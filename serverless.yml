@@ -2,6 +2,15 @@ service: ingest-schema-repo
 
 frameworkVersion: ">=1.0.0 <2.0.0"
 
+plugins:
+  - serverless-finch
+
+custom:
+  ingest-schema-repo: ${file(ingest-schema-repo.yml)}
+  client:
+    bucketName: ${self:custom.ingest-schema-repo.bucket-name}
+    distributionFolder: client
+
 provider:
   name: aws
   runtime: nodejs6.10

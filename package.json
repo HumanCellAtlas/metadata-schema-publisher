@@ -1,0 +1,25 @@
+{
+  "name": "ingest-schema-repo",
+  "version": "0.1.0",
+  "description": "[Run a function locally](https://serverless.com/framework/docs/providers/aws/cli-reference/invoke-local/#) ``` serverless invoke local --function functionName  ```",
+  "main": "handler.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HumanCellAtlas/ingest-schema-repo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HumanCellAtlas/ingest-schema-repo/issues"
+  },
+  "homepage": "https://github.com/HumanCellAtlas/ingest-schema-repo#readme",
+  "dependencies": {
+    "serverless-finch": "^1.3.1"
+  }
+}

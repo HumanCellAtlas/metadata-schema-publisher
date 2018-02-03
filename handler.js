@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports.handler.onGithubEvent = (event, context, callback) => {
+module.exports.onGithubEvent = (event, context, callback) => {
   console.log(JSON.stringify(event))
   const response = {
     statusCode: 200,
@@ -10,8 +10,5 @@ module.exports.handler.onGithubEvent = (event, context, callback) => {
     }),
   };
 
-  callback(null, response);
-
-  // Use this code if you don't use the http event with the LAMBDA-PROXY integration
-  // callback(null, { message: 'Go Serverless v1.0! Your function executed successfully!', event });
+  callback(null, { message: 'Go Serverless v1.0! Your function executed successfully!', event });
 };
