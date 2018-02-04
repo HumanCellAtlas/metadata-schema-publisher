@@ -1,6 +1,5 @@
 'use strict'
-require('lambda-git')()
-const Git = require('nodegit')
+const git = require('simple-git')
 const rimraf = require('rimraf')
 const aws = require('aws-sdk')
 const s3 = new aws.S3()
@@ -29,52 +28,63 @@ module.exports.onGithubRelease = (event, context, callback) => {
 }
 
 function clone (tag_name, html_url, callback) {
-  let git_path = '/tmp/git'
-  if (fs.existsSync(git_path)) {
-    let url = html_url
-    let local = '/tmp/repo'
-    let cloneOptions = {}
-    cloneOptions.checkoutBranch = tag_name
-    rimraf(local, function () {
-      console.log('* Removed existing: ' + local)
-      console.log('* Cloning: ' + url + ' tag: ' + tag_name)
-      Git.Clone(url, local).then(function (repo) {
-        console.log('* Cloned: ' + url + 'to ' + local)
-        copyToS3(local, tag_name, callback)
-      }).catch(function (err) {
-        callback(err, null)
+  require('lambda-git')().then(() => {
+    let git_path = '/tmp/git'
+    if (fs.existsSync(git_path)) {
+      let url = html_url
+      let local = '/tmp/repo'
+      let cloneOptions = {}
+      cloneOptions.checkoutBranch = tag_name
+      rimraf(local, function () {
+        console.log('* Removed existing: ' + local)
+        console.log('* Cloning: ' + url + ' tag: ' + tag_name)
+        git().clone(url, local)
+          .then(() => {
+            console.log('* Cloned: ' + url + 'to ' + local)
+            copyToS3(local, tag_name, callback)
+          })
       })
-    })
-  }
-  else
-  {
-    console.log('*' + git_path + " does not exist")
-    callback(null, null)
-  }
+    }
+    else {
+      fs.readdir('/tmp/', (err, files) => {
+        console.log(files)
+      })
+      const response = {
+        statusCode: 500,
+        body: JSON.stringify({
+          message: git_path + ' does not exist'
+        }),
+      }
+      callback(null, response)
+    }
+  })
 }
 
 function copyToS3 (local, tag_name, callback) {
-  const params = {Bucket: 'schema.data.humancellatlas.org', Key: 'tag_name', ACL: 'public-read', Body: ''}
-  upload(params)
+  const bucket = process.env.BUCKET
+  console.log('* Copying to bucket: ' + bucket)
   fs.readdir(local + '/json_schema', (err, files) => {
     files.forEach(file => {
-      fs.readFile(local + '/json_schema/' + file, function (err, data) {
-        var param = {Bucket: 'schema.data.humancellatlas.org/' + tag_name, Key: file, Body: data}
-        console.log(param)
-      })
+      const path = local + '/json_schema/' + file
+      if (!fs.lstatSync(path).isDirectory()) {
+        fs.readFile(path, function (err, data) {
+          const params = {Bucket: bucket, Key: tag_name + '/' + file, Body: data}
+          uploadFile(params)
+        })
+      }
     })
+    finish(callback)
   })
-  finish(callback)
 }
 
-function upload(params) {
+function uploadFile (params) {
+  console.log('Uploading ' + params.Key + ' to ' + params.Bucket)
   s3.upload(params, function (err, data) {
     if (err) {
       console.log('Error creating the file: ', err)
       callback(err, null)
     } else {
-      console.log('Successfully created a folder on S3')
-      f
+      console.log('Successfully creating ' + params.Key + ' on S3')
     }
   })
 }
