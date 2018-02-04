@@ -1,4 +1,5 @@
 'use strict'
+require('lambda-git')()
 const Git = require('nodegit')
 const rimraf = require('rimraf')
 const aws = require('aws-sdk')
@@ -28,21 +29,28 @@ module.exports.onGithubRelease = (event, context, callback) => {
 }
 
 function clone (tag_name, html_url, callback) {
-  require('lambda-git')()
-  let url = html_url
-  let local = '/tmp/repo'
-  let cloneOptions = {}
-  cloneOptions.checkoutBranch = tag_name
-  rimraf(local, function () {
-    console.log('* Removed existing: ' + local)
-    console.log('* Cloning: ' + url + ' tag: ' + tag_name)
-    Git.Clone(url, local).then(function (repo) {
-      console.log('* Cloned: ' + url + 'to ' + local)
-      copyToS3(local, tag_name, callback)
-    }).catch(function (err) {
-      callback(err, null)
+  let git_path = '/tmp/git'
+  if (fs.existsSync(git_path)) {
+    let url = html_url
+    let local = '/tmp/repo'
+    let cloneOptions = {}
+    cloneOptions.checkoutBranch = tag_name
+    rimraf(local, function () {
+      console.log('* Removed existing: ' + local)
+      console.log('* Cloning: ' + url + ' tag: ' + tag_name)
+      Git.Clone(url, local).then(function (repo) {
+        console.log('* Cloned: ' + url + 'to ' + local)
+        copyToS3(local, tag_name, callback)
+      }).catch(function (err) {
+        callback(err, null)
+      })
     })
-  })
+  }
+  else
+  {
+    console.log('*' + git_path + " does not exist")
+    callback(null, null)
+  }
 }
 
 function copyToS3 (local, tag_name, callback) {
