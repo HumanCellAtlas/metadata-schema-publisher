@@ -5,22 +5,6 @@ const aws = require('aws-sdk')
 const s3 = new aws.S3()
 const fs = require('fs')
 
-
-module.exports.onGithubEvent = (event, context, callback) => {
-    let sns = event.Records[0].Sns
-    let notification = JSON.parse(sns.Message)
-    console.log(notification)
-    const response = {
-        statusCode: 200,
-        body: JSON.stringify({
-            message: 'Go Serverless v1.0! Your function executed successfully!',
-            input: event,
-        }),
-    }
-
-    callback(null, {message: 'Go Serverless v1.0! Your function executed successfully!'})
-}
-
 module.exports.onGithubRelease = (event, context, callback) => {
     let message = JSON.parse(event.body)
     let tag_name = message.release.tag_name
@@ -36,7 +20,7 @@ function clone(tag_name, html_url, callback) {
             let local = '/tmp/repo'
             let cloneOptions = {}
             cloneOptions.checkoutBranch = tag_name
-            rimraf(local, function () {
+            rimraf(local, function() {
                 console.log('* Removed existing: ' + local)
                 console.log('* Cloning: ' + url + ' tag: ' + tag_name)
                 git().clone(url, local)
@@ -72,8 +56,8 @@ function copyToS3(local, tag_name, callback) {
             if (!fs.lstatSync(path).isDirectory()) {
                 const key = dict[file]
                 if (key != null) {
-                    fs.readFile(path, function (err, data) {
-                        const params = {Bucket: bucket, Key: key, Body: data}
+                    fs.readFile(path, function(err, data) {
+                        const params = { Bucket: bucket, Key: key, Body: data }
                         uploadFile(params)
                     })
                 }
@@ -85,11 +69,12 @@ function copyToS3(local, tag_name, callback) {
 
 function uploadFile(params) {
     console.log('Uploading ' + params.Key + ' to ' + params.Bucket)
-    s3.upload(params, function (err, data) {
+    s3.upload(params, function(err, data) {
         if (err) {
             console.log('Error creating the file: ', err)
             callback(err, null)
-        } else {
+        }
+        else {
             console.log('Successfully creating ' + params.Key + ' on S3')
         }
     })
