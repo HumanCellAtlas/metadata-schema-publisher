@@ -13,7 +13,6 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs6.10
   region: eu-west-1
   environment:
     BUCKET: ${self:custom.ingest-schema-repo.bucket-name}
@@ -24,12 +23,16 @@ provider:
       Resource: "arn:aws:s3:::${self:custom.ingest-schema-repo.bucket-name}/*"
 
 functions:
-  onGithubEvent:
-    handler: handler.onGithubEvent
-    events:
-      - sns: github-event
-  onGithubRelease:
+  onGithubReleaseJS:
+    runtime: nodejs6.10
     handler: handler.onGithubRelease
+    events:
+      - http:
+          path: github/release_js
+          method: post
+  onGithubRelease:
+    runtime: python3.6
+    handler: handler.on_github_release
     events:
       - http:
           path: github/release
