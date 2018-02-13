@@ -4,6 +4,7 @@ frameworkVersion: ">=1.0.0 <2.0.0"
 
 plugins:
   - serverless-finch
+  - serverless-python-requirements
 
 custom:
   ingest-schema-repo: ${file(ingest-schema-repo.yml)}
