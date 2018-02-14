@@ -23,6 +23,8 @@ provider:
         - s3:PutObject
       Resource: "arn:aws:s3:::${self:custom.ingest-schema-repo.bucket-name}/*"
 
+package:
+  individually: true
 functions:
   onGithubReleaseJS:
     runtime: nodejs6.10
@@ -38,3 +40,9 @@ functions:
       - http:
           path: github/release
           method: post
+  installGit:
+    runtime: python3.6
+    handler: git.install_git
+    package:
+      include:
+        - library/git-2.4.3.tar
