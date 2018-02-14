@@ -9,7 +9,8 @@ from github import Github, GithubException
 
 def on_github_release(event, context):
     repo_name = _process_event(event)
-    repo = Github("0a43698e4acb763d4713f2e1765a0d7622ab26be").get_repo(repo_name)
+    api_key = os.environ['API_KEY']
+    repo = Github(api_key).get_repo(repo_name)
     result = _process_directory(repo, 'json_schema')
     response = {
         "statusCode": 200,

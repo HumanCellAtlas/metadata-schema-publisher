@@ -17,6 +17,7 @@ provider:
   region: eu-west-1
   environment:
     BUCKET: ${self:custom.ingest-schema-repo.bucket-name}
+    API_KEY: ${self:custom.ingest-schema-repo.api-key}
   iamRoleStatements:
     - Effect: Allow
       Action:
