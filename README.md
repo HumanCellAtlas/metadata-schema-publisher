@@ -8,7 +8,7 @@ serverless invoke local --function functionName
 ### Simulate a github event
 
 ```
-serverless invoke local --function onGithubEvent --path ./examples/github-event-release.json
+serverless invoke local --function onGithubRelease --path ./tests/files/github-event-release.json
 ```
 
 ### Invoke

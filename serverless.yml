@@ -17,15 +17,13 @@ provider:
   region: eu-west-1
   environment:
     BUCKET: ${self:custom.ingest-schema-repo.bucket-name}
-    GIT_PYTHON_GIT_EXECUTABLE: "git_exec/usr/bin/git"
   iamRoleStatements:
     - Effect: Allow
       Action:
         - s3:PutObject
+        - s3:PutObjectAcl
       Resource: "arn:aws:s3:::${self:custom.ingest-schema-repo.bucket-name}/*"
 
-package:
-  individually: true
 functions:
   onGithubReleaseJS:
     runtime: nodejs6.10
@@ -41,9 +39,3 @@ functions:
       - http:
           path: github/release
           method: post
-  installGit:
-    runtime: python3.6
-    handler: git.install_git
-    package:
-      include:
-        - git_exec
