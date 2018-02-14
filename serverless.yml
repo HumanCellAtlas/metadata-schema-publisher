@@ -17,6 +17,7 @@ provider:
   region: eu-west-1
   environment:
     BUCKET: ${self:custom.ingest-schema-repo.bucket-name}
+    GIT_PYTHON_GIT_EXECUTABLE: "git_exec/usr/bin/git"
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -45,4 +46,4 @@ functions:
     handler: git.install_git
     package:
       include:
-        - library/git-2.4.3.tar
+        - git_exec
