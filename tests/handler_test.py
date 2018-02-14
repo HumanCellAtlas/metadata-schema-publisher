@@ -2,8 +2,23 @@ from unittest import TestCase
 import git
 from unittest.mock import patch
 import handler
+import json
 
 class HandlerTest(TestCase):
+    
+    def test_process_event(self):
+        # given:
+        with open('tests/files/github-event-release.json') as json_file:
+            event_json = json.loads(json_file.read())
+            
+        # when:
+        release = handler.process_event(event_json)
+        
+        # then:
+        self.assertTrue(release)
+        self.assertEqual('https://github.com/danielvaughan/metadata-schema', 
+            release)
+        
     
     def test_handle(self):
         with patch('git.Repo.clone_from') as mock_clone, \
