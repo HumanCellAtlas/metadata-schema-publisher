@@ -1,6 +1,6 @@
 import json
 import shutil
-from git import Repo, GitCommandError
+from github import Github
 
 def on_github_release(event, context):
     release = process_event(event)
@@ -17,18 +17,6 @@ def on_github_release(event, context):
     
 def process_event(event):
     message = json.loads(event["body"])
-    return message["repository"]["html_url"]
+    return message["repository"]["full_name"]
 
-def clone_repo(repo_url, local_path):
-    try:
-        clear_local_path(local_path)
-        Repo.clone_from(repo_url, local_path)
-    except GitCommandError as error:
-        notify_of_error(error)
-        
-    
-def clear_local_path(local_path):
-    shutil.rmtree(local_path)
-    
-def notify_of_error(error):
-    print(error)
+
