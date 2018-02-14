@@ -20,7 +20,7 @@ class HandlerTest(TestCase):
             release)
         
     
-    def test_handle(self):
+    def test_clone_repo(self):
         with patch('git.Repo.clone_from') as mock_clone, \
             patch('handler.clear_local_path') as mock_clear_local_path:
             # when
@@ -32,7 +32,7 @@ class HandlerTest(TestCase):
             mock_clear_local_path.assert_called_once_with(local_path)
             mock_clone.assert_called_once_with(repo_url, local_path)
             
-    def test_handle_not_found(self):
+    def test_clone_repo_not_found(self):
         with patch('git.Repo.clone_from') as mock_clone, \
             patch('handler.clear_local_path'), \
             patch('handler.notify_of_error') as mock_notify:
