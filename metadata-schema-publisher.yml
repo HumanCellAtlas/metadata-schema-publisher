@@ -1,4 +1,4 @@
-name: schema-pub
-bucket-name: schema.data.humancellatlas.org
+name: metadata-schema-publisher
+bucket-name: schema.humancellatlas.org
 api-key: 0a43698e4acb763d4713f2e1765a0d7622ab26be
 notification-event: notification

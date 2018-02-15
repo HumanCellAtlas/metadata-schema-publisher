@@ -1,4 +1,4 @@
-service: ${self:custom.ingest-schema-repo.name}
+service: ${self:custom.metadata-schema-publisher.name}
 
 frameworkVersion: ">=1.0.0 <2.0.0"
 
@@ -7,26 +7,22 @@ plugins:
   - serverless-python-requirements
 
 custom:
-  ingest-schema-repo: ${file(ingest-schema-repo.yml)}
-  snsTopicName: ${self:custom.ingest-schema-repo.name}-${self:custom.ingest-schema-repo.notification-event}
+  metadata-schema-publisher: ${file(metadata-schema-publisher.yml)}
+  snsTopicName: ${self:custom.metadata-schema-publisher.name}-${self:custom.metadata-schema-publisher.notification-event}
   client:
-    bucketName: ${self:custom.ingest-schema-repo.bucket-name}
+    bucketName: ${self:custom.metadata-schema-publisher.bucket-name}
     distributionFolder: client
 
 provider:
   name: aws
-  region: eu-west-1
-  environment:
-    BUCKET: ${self:custom.ingest-schema-repo.bucket-name}
-    API_KEY: ${self:custom.ingest-schema-repo.api-key}
-    TOPIC_NAME: ${self:custom.snsTopicName}
-    TOPIC_ARN:  { "Fn::Join" : ["", ["arn:aws:sns:${self:provider.region}:", { "Ref" : "AWS::AccountId" }, ":${self:custom.snsTopicName}" ] ]  }
+  region: us-east-1
   iamRoleStatements:
     - Effect: Allow
       Action:
+        - s3:ListBucket
         - s3:PutObject
         - s3:PutObjectAcl
-      Resource: "arn:aws:s3:::${self:custom.ingest-schema-repo.bucket-name}/*"
+      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.bucket-name}/*"
     - Effect: Allow
       Action:
        - "sns:Publish"
@@ -34,12 +30,16 @@ provider:
        - "Ref" : "Notification"
 
 functions:
-  onGithubRelease:
+  onGithubPush:
     runtime: python3.6
-    handler: handler.on_github_release
+    handler: handler.on_github_push
+    environment:
+      BUCKET: ${self:custom.metadata-schema-publisher.bucket-name}
+      API_KEY: ${self:custom.metadata-schema-publisher.api-key}
+      TOPIC_NAME: ${self:custom.snsTopicName}
     events:
       - http:
-          path: github/release
+          path: github/push
           method: post
 
 resources:

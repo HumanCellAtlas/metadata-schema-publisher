@@ -22,13 +22,17 @@ pip install -r requirements.txt
 Run with a simulated GitHub event:
 
 ```
-serverless invoke local --function onGithubRelease --path ./tests/files/github-event-release.json
+serverless invoke local --function onGithubPush --path ./tests/files/github-event-push.json
 ```
 
 ## Invoke on AWS
 ```
-serverless invoke --function onGithubRelease --path ./tests/files/github-event-release.json
+serverless invoke --function onGithubPush --path ./tests/files/github-event-push.json
 
+```
+## Deploy
+```
+serverless deploy -v
 ```
 
 ### Suggested Logic
@@ -54,13 +58,13 @@ Check out that tag and copy the content of json_schema into a new s3 directory w
 
 
 ## TODO
-- -Update README.md-
-- -Remove JavaScript-
-- Rename project to something starting metadata
-- Change region of deployment
+- ~~Update README.md~~
+- ~~Remove JavaScript~~
+- ~~Rename project to something starting metadata~~
+- ~~Change region of deployment~~
 - Change to actual Github repo
-- Chnage to schema.humancellatlas.org bucket
-- Change to responding to commits instead of releases
+- ~~Chnage to schema.humancellatlas.org bucket~~
+- ~~Change to responding to commits instead of releases~~
 - Add Slack notifications to a HCA slack channel
     - For triggered
     - For results
