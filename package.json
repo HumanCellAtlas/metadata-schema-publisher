@@ -1,6 +1,6 @@
 {
-  "name": "ingest-schema-repo",
-  "version": "0.1.0",
+  "name": "metadata-schema-publisher",
+  "version": "1.0.0",
   "description": "[Run a function locally](https://serverless.com/framework/docs/providers/aws/cli-reference/invoke-local/#) ``` serverless invoke local --function functionName  ```",
   "main": "handler.js",
   "directories": {
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HumanCellAtlas/ingest-schema-repo.git"
+    "url": "git+https://github.com/HumanCellAtlas/metadata-schema-publisher.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/HumanCellAtlas/ingest-schema-repo/issues"
+    "url": "https://github.com/HumanCellAtlas/metadata-schema-publisher/issues"
   },
-  "homepage": "https://github.com/HumanCellAtlas/ingest-schema-repo#readme",
+  "homepage": "https://github.com/HumanCellAtlas/metadata-schema-publisher#readme",
   "dependencies": {
     "aws-sdk": "^2.188.0",
     "lambda-git": "^0.1.1",

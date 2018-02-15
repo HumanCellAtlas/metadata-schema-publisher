@@ -7,7 +7,7 @@ import boto3
 from github import Github, GithubException
 
 
-def on_github_release(event, context):
+def on_github_push(event, context):
     repo_name = _process_event(event)
     api_key = os.environ['API_KEY']
     repo = Github(api_key).get_repo(repo_name)
@@ -29,11 +29,13 @@ def on_github_release(event, context):
 
 
 def _process_event(event):
+    print(event)
     message = json.loads(event["body"])
     return message["repository"]["full_name"]
 
 
 def _process_directory(repo, server_path):
+    print("Processing " + server_path + " in " + repo.name)
     created_list = []
     branch = repo.get_branch('v5_prototype')
     sha = branch.commit.sha
