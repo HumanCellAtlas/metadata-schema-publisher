@@ -14,7 +14,7 @@ def on_github_push(event, context):
     _send_notification("Commit detected on " + repo_name, context)
     result = _process_directory(repo, 'json_schema')
     result_str = "\n".join(result)
-    if result:
+    if len(result) == 0:
         message = "No schema changes published"
     else:
         message = "New schema changes published:\n" + result_str
