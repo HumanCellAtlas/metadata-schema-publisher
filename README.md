@@ -1,19 +1,33 @@
+# Metadata Schema Publisher
+
+## Setup
+
+### Install NodeJS dependencies
+Run:
+```
+npm install
+```
+To install required node libraries. Even though the Lambdas are written in Python the framework is in NodeJS and it needs extra plugins.
+
+### Install Python dependencies
+Run:
+```
+pip install -r requirements.txt
+```
+
 ## Run Locally
 
 [Run a function locally](https://serverless.com/framework/docs/providers/aws/cli-reference/invoke-local/#)
-```
-serverless invoke local --function functionName 
-```
 
-### Simulate a github event
+Run with a simulated GitHub event:
 
 ```
 serverless invoke local --function onGithubRelease --path ./tests/files/github-event-release.json
 ```
 
-### Invoke
+## Invoke on AWS
 ```
-serverless invoke --function onGithubRelease --path ./examples/github-event-release.json --aws-profile secondary-hca-profile
+serverless invoke --function onGithubRelease --path ./tests/files/github-event-release.json
 
 ```
 
@@ -40,7 +54,8 @@ Check out that tag and copy the content of json_schema into a new s3 directory w
 
 
 ## TODO
-- Update readme
+- -Update README.md-
+- -Remove JavaScript-
 - Rename project to something starting metadata
 - Change region of deployment
 - Change to actual Github repo
@@ -49,5 +64,6 @@ Check out that tag and copy the content of json_schema into a new s3 directory w
 - Add Slack notifications to a HCA slack channel
     - For triggered
     - For results
+    - Using [https://github.com/robbwagoner/aws-lambda-sns-to-slack](https://github.com/robbwagoner/aws-lambda-sns-to-slack)
 - Consider adding CloudFront (with 5 min cache)
     

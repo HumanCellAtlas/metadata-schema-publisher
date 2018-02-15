@@ -11,10 +11,19 @@ def on_github_release(event, context):
     repo_name = _process_event(event)
     api_key = os.environ['API_KEY']
     repo = Github(api_key).get_repo(repo_name)
+    _send_notification("Commit detected on " + repo_name, context)
     result = _process_directory(repo, 'json_schema')
+    result_str = "\n".join(result)
+    if result:
+        message = "No schema changes published"
+    else:
+        message = "New schema changes published:\n" + result_str
+    _send_notification(message, context)
     response = {
         "statusCode": 200,
-        "body": result
+        "body": {
+            "created": json.dumps(result)
+        }
     }
     return response
 
@@ -22,6 +31,7 @@ def on_github_release(event, context):
 def _process_event(event):
     message = json.loads(event["body"])
     return message["repository"]["full_name"]
+
 
 def _process_directory(repo, server_path):
     created_list = []
@@ -41,7 +51,7 @@ def _process_directory(repo, server_path):
                     key = _get_schema_key(file_data)
                     created = _upload(key, file_data)
                     if created:
-                        created_list.append(key) 
+                        created_list.append(key)
             except(GithubException, IOError) as e:
                 logging.error('Error processing %s: %s', content.path, e)
     return created_list
@@ -73,3 +83,19 @@ def _get_schema_key(file_data):
     key = schema_id.replace(".json", "")
     key = key.replace("http://schema.humancellatlas.org/", "")
     return key
+
+
+def _send_notification(message, context):
+    topic_name = os.environ['TOPIC_NAME']
+    account_id = context.invoked_function_arn.split(":")[4]
+    if account_id != "Fake":
+        print("Sending notification to " + topic_name)
+        topic_arn = "arn:aws:sns:" + os.environ['AWS_REGION'] + ":" + account_id + ":" + topic_name
+        print("Topics ARN " + topic_arn)
+        sns = boto3.client(service_name="sns")
+        sns.publish(
+            TopicArn=topic_arn,
+            Message=message
+        )
+    else:
+        print("Skipping notification: " + message)

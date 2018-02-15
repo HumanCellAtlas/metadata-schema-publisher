@@ -1,4 +1,4 @@
-service: ingest-schema-repo
+service: ${self:custom.ingest-schema-repo.name}
 
 frameworkVersion: ">=1.0.0 <2.0.0"
 
@@ -8,6 +8,7 @@ plugins:
 
 custom:
   ingest-schema-repo: ${file(ingest-schema-repo.yml)}
+  snsTopicName: ${self:custom.ingest-schema-repo.name}-${self:custom.ingest-schema-repo.notification-event}
   client:
     bucketName: ${self:custom.ingest-schema-repo.bucket-name}
     distributionFolder: client
@@ -18,21 +19,21 @@ provider:
   environment:
     BUCKET: ${self:custom.ingest-schema-repo.bucket-name}
     API_KEY: ${self:custom.ingest-schema-repo.api-key}
+    TOPIC_NAME: ${self:custom.snsTopicName}
+    TOPIC_ARN:  { "Fn::Join" : ["", ["arn:aws:sns:${self:provider.region}:", { "Ref" : "AWS::AccountId" }, ":${self:custom.snsTopicName}" ] ]  }
   iamRoleStatements:
     - Effect: Allow
       Action:
         - s3:PutObject
         - s3:PutObjectAcl
       Resource: "arn:aws:s3:::${self:custom.ingest-schema-repo.bucket-name}/*"
+    - Effect: Allow
+      Action:
+       - "sns:Publish"
+      Resource:
+       - "Ref" : "Notification"
 
 functions:
-  onGithubReleaseJS:
-    runtime: nodejs6.10
-    handler: handler.onGithubRelease
-    events:
-      - http:
-          path: github/release_js
-          method: post
   onGithubRelease:
     runtime: python3.6
     handler: handler.on_github_release
@@ -40,3 +41,10 @@ functions:
       - http:
           path: github/release
           method: post
+
+resources:
+  Resources:
+    Notification:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:custom.snsTopicName}
