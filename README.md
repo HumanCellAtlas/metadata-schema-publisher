@@ -38,6 +38,7 @@ serverless deploy -v
 ```
 
 ###Logic
+
 - On GitHub [push](https://developer.github.com/v3/activity/events/types/#pushevent) event
 - Go through all files ending with .json in the json_schema folder in the rep
 - Check the id field in each schema and use that as the key of S3
@@ -50,7 +51,7 @@ serverless deploy -v
 - ~~Remove JavaScript~~
 - ~~Rename project to something starting metadata~~
 - ~~Change region of deployment~~
-- Change to actual Github repo
+- ~~Change to actual Github repo~~
 - ~~Chnage to schema.humancellatlas.org bucket~~
 - ~~Change to responding to commits instead of releases~~
 - ~~Add Slack notifications to a HCA slack channel~~
