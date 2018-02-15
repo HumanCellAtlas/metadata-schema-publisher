@@ -37,3 +37,17 @@ Check out that tag and copy the content of json_schema into a new s3 directory w
    s3.putObject(params).promise()
 ```
 - Remove files from tmp
+
+
+## TODO
+- Update readme
+- Rename project to something starting metadata
+- Change region of deployment
+- Change to actual Github repo
+- Chnage to schema.humancellatlas.org bucket
+- Change to responding to commits instead of releases
+- Add Slack notifications to a HCA slack channel
+    - For triggered
+    - For results
+- Consider adding CloudFront (with 5 min cache)
+    
