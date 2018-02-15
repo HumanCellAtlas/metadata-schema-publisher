@@ -1,5 +1,7 @@
 # Metadata Schema Publisher
 
+Automatically publishes metadata schemas to [schema.humacellatlas.org](http://schema.humancellatlas.org) when changes are made to the [GitHub repo](https://github.com/HumanCellAtlas/metadata-schema).
+
 ## Setup
 
 ### Install NodeJS dependencies
@@ -35,26 +37,12 @@ serverless invoke --function onGithubPush --path ./tests/files/github-event-push
 serverless deploy -v
 ```
 
-### Suggested Logic
-On github [release](https://developer.github.com/v3/activity/events/types/#releaseevent) event
-
-AWS SNS is an integration rather than a webhook and it seems to receive only push events as opposed to webhooks where we could filter purely on a release
-
-If a new tag has been created e.g.
-```
-"ref\":\"refs/tags/github-test\",\"before\":\"0000000000000000000000000000000000000000\"
-```
-
-Check out that tag and copy the content of json_schema into a new s3 directory with the same name as the tag.
-
-- Use something like this for do git clone into /tmp https://github.com/nodegit/nodegit
-    - Lambda does not have git installed so try require("lambda-git")(); which installs a git binary on lambda
-- Copy files into S3
-```
-   var s3 = new AWS.S3();
-   s3.putObject(params).promise()
-```
-- Remove files from tmp
+###Logic
+- On GitHub [push](https://developer.github.com/v3/activity/events/types/#pushevent) event
+- Go through all files ending with .json in the json_schema folder in the rep
+- Check the id field in each schema and use that as the key of S3
+- Check if the S3 key exists and if not upload the file
+- Send notifications for when the process starts and a summary when it finishes
 
 
 ## TODO
@@ -65,9 +53,8 @@ Check out that tag and copy the content of json_schema into a new s3 directory w
 - Change to actual Github repo
 - ~~Chnage to schema.humancellatlas.org bucket~~
 - ~~Change to responding to commits instead of releases~~
-- Add Slack notifications to a HCA slack channel
-    - For triggered
-    - For results
-    - Using [https://github.com/robbwagoner/aws-lambda-sns-to-slack](https://github.com/robbwagoner/aws-lambda-sns-to-slack)
+- ~~Add Slack notifications to a HCA slack channel~~
+  ~~- For triggered~~
+  ~~- For results~~
 - Consider adding CloudFront (with 5 min cache)
     
