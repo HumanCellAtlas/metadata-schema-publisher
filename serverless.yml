@@ -16,6 +16,7 @@ custom:
 provider:
   name: aws
   region: us-east-1
+  timeout: 300
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -41,6 +42,23 @@ functions:
       - http:
           path: github/push
           method: post
+  snsToSlack:
+    runtime: python3.6
+    handler: handler.sns_to_slack
+    environment:
+      SLACK_URL: ${self:custom.metadata-schema-publisher.slack-url}
+    events:
+      - sns:
+          arn:
+            Fn::Join:
+              - ""
+              - - "arn:aws:sns:"
+                - Ref: "AWS::Region"
+                - ":"
+                - Ref: "AWS::AccountId"
+                - ":"
+                - ${self:custom.snsTopicName}
+          topicName: ${self:custom.snsTopicName}
 
 resources:
   Resources:
