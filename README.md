@@ -57,5 +57,12 @@ serverless deploy -v
 - ~~Add Slack notifications to a HCA slack channel~~
   ~~- For triggered~~
   ~~- For results~~
+- ~~Check index.html works when shifts to schema.humacellatlas.org~~
 - Consider adding CloudFront (with 5 min cache)
+- Encrypt API key and Slack URL
+- Add and check secret from webhook
+- ~~Add user that performed the push to notification~~
+- See if we need to specifiy the mime type
+- Consider how to return 200 to webhook quickly to stop it showing failed
+
     
