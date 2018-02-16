@@ -1,24 +1,33 @@
 import base64
 import json
 import os
-import requests
 
 import boto3
+import requests
 from github import Github, GithubException
 
 
 def on_github_push(event, context):
-    repo_name = _process_event(event)
-    api_key = os.environ['API_KEY']
-    repo = Github(api_key).get_repo(repo_name)
-    _send_notification("Commit detected on " + repo_name, context)
-    result = _process_directory(repo, 'json_schema')
-    result_str = "\n".join(result)
-    if len(result) == 0:
-        message = "No schema changes published"
+    message = _process_event(event)
+    ref = message["ref"]
+    if ref == "refs/heads/master":
+        repo_name = message["repository"]["full_name"]
+        pusher = message["pusher"]["name"]
+        api_key = os.environ['API_KEY']
+        repo = Github(api_key).get_repo(repo_name)
+        notification_message = "Commit to " + ref + " detected on " + repo_name + " by " + pusher
+        print(notification_message)
+        _send_notification(notification_message, context)
+        result = _process_directory(repo, 'json_schema', context)
+        result_str = "\n".join(result)
+        if len(result) == 0:
+            result_message = "No schema changes published"
+        else:
+            result_message = "New schema changes published:\n" + result_str
+        print(result_message)
+        _send_notification(result_message, context)
     else:
-        message = "New schema changes published:\n" + result_str
-    _send_notification(message, context)
+        result = []
     response = {
         "statusCode": 200,
         "body": {
@@ -30,10 +39,10 @@ def on_github_push(event, context):
 
 def _process_event(event):
     message = json.loads(event["body"])
-    return message["repository"]["full_name"]
+    return message
 
 
-def _process_directory(repo, server_path):
+def _process_directory(repo, server_path, context):
     print("Processing " + server_path + " in " + repo.name)
     created_list = []
     branch = repo.get_branch('v5_prototype')
@@ -41,7 +50,7 @@ def _process_directory(repo, server_path):
     contents = repo.get_dir_contents(server_path, ref=sha)
     for content in contents:
         if content.type == 'dir' and ("bundle" not in content.path):
-            created_list.extend(_process_directory(repo, content.path))
+            created_list.extend(_process_directory(repo, content.path, context))
         else:
             try:
                 path = content.path
@@ -51,7 +60,7 @@ def _process_directory(repo, server_path):
                     file_content = repo.get_contents(path, ref=sha)
                     file_data = base64.b64decode(file_content.content)
                     key = _get_schema_key(file_data)
-                    created = _upload(key, file_data)
+                    created = _upload(key, file_data, context)
                     if created:
                         created_list.append(key)
                 else:
@@ -61,15 +70,17 @@ def _process_directory(repo, server_path):
     return created_list
 
 
-def _upload(key, file_data):
+def _upload(key, file_data, context):
     bucket = os.environ['BUCKET']
     s3 = boto3.client('s3')
     if not _key_exists(s3, bucket, key):
         try:
-            s3.put_object(Bucket=bucket, Key=key, Body=file_data, ACL='public-read')
+            s3.put_object(Bucket=bucket, Key=key, Body=file_data, ContentType='application/json', ACL='public-read')
             return True
         except Exception as e:
-            print('Error uploading ' + key, e)
+            error_message = 'Error uploading ' + key
+            print(error_message, e)
+            _send_notification(error_message, context)
     else:
         return False
 
