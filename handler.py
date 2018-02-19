@@ -58,9 +58,12 @@ def _process_directory(repo, server_path, context):
                     file_content = repo.get_contents(path)
                     file_data = base64.b64decode(file_content.content)
                     key = _get_schema_key(file_data)
-                    created = _upload(key, file_data, context)
-                    if created:
-                        created_list.append(key)
+                    if key is None:
+                        print("- could not find key for: " + path)
+                    else:
+                        created = _upload(key, file_data, context)
+                        if created:
+                            created_list.append(key)
                 else:
                     print("- skipping: " + path)
             except(GithubException, IOError) as e:
@@ -95,9 +98,12 @@ def _key_exists(s3, bucket, key):
 
 def _get_schema_key(file_data):
     file_json = json.loads(file_data)
-    schema_id = file_json['id']
-    key = schema_id.replace(".json", "")
-    key = key.replace("http://schema.humancellatlas.org/", "")
+    if 'id' in file_json:
+        schema_id = file_json['id']
+        key = schema_id.replace(".json", "")
+        key = key.replace("https://schema.humancellatlas.org/", "")
+    else:
+        key = None
     return key
 
 
