@@ -45,9 +45,7 @@ def _process_event(event):
 def _process_directory(repo, server_path, context):
     print("Processing " + server_path + " in " + repo.name)
     created_list = []
-    branch = repo.get_branch('v5_prototype')
-    sha = branch.commit.sha
-    contents = repo.get_dir_contents(server_path, ref=sha)
+    contents = repo.get_dir_contents(server_path)
     for content in contents:
         if content.type == 'dir' and ("bundle" not in content.path):
             created_list.extend(_process_directory(repo, content.path, context))
@@ -57,7 +55,7 @@ def _process_directory(repo, server_path, context):
                 file_root, file_extension = os.path.splitext(path)
                 if file_extension == '.json':
                     print("- processing: " + path)
-                    file_content = repo.get_contents(path, ref=sha)
+                    file_content = repo.get_contents(path)
                     file_data = base64.b64decode(file_content.content)
                     key = _get_schema_key(file_data)
                     created = _upload(key, file_data, context)
