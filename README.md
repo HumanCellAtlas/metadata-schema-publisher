@@ -62,7 +62,7 @@ serverless deploy -v
 - Encrypt API key and Slack URL
 - Add and check secret from webhook
 - ~~Add user that performed the push to notification~~
-- See if we need to specifiy the mime type
+- ~~See if we need to specifiy the mime type~~
 - Consider how to return 200 to webhook quickly to stop it showing failed
 
     
