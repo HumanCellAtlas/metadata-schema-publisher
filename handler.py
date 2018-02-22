@@ -47,7 +47,7 @@ def _process_directory(repo, server_path, context):
     created_list = []
     contents = repo.get_dir_contents(server_path)
     for content in contents:
-        if content.type == 'dir' and ("bundle" not in content.path):
+        if content.type == 'dir':
             created_list.extend(_process_directory(repo, content.path, context))
         else:
             try:
