@@ -2,6 +2,9 @@
 
 Automatically publishes metadata schemas to [schema.humacellatlas.org](http://schema.humancellatlas.org) when changes are made to the [GitHub repo](https://github.com/HumanCellAtlas/metadata-schema).
 
+## Architecture
+![Architecture of schema.humancellatlas.org metadata publisher](schema.humancellatlas.org.png)
+
 ## Setup
 
 ### Install NodeJS dependencies
