@@ -27,7 +27,7 @@ pip install -r requirements.txt
 Run with a simulated GitHub event:
 
 ```
-serverless invoke local --function onGithubPush --path ./tests/files/github-event-push.json
+serverless invoke local --function onGithubPush --path ./tests/files/raw-push-event.json
 ```
 
 ## Invoke on AWS
