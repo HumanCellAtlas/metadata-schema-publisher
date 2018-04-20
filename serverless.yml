@@ -47,6 +47,7 @@ functions:
     handler: handler.sns_to_slack
     environment:
       SLACK_URL: ${self:custom.metadata-schema-publisher.slack-url}
+      NOTIFICATION_ENDPOINTS: ${self:custom.metadata-schema-publisher.notification-endpoints}
     events:
       - sns:
           arn:

@@ -17,15 +17,16 @@ def on_github_push(event, context):
         repo = Github(api_key).get_repo(repo_name)
         notification_message = "Commit to " + ref + " detected on " + repo_name + " by " + pusher
         print(notification_message)
-        _send_notification(notification_message, context)
+        _send_slack_notification(notification_message, context)
         result = _process_directory(repo, 'json_schema', context)
         result_str = "\n".join(result)
         if len(result) == 0:
             result_message = "No schema changes published"
         else:
             result_message = "New schema changes published:\n" + result_str
+            result_message = result_message + _send_schemas_notifications(context)
         print(result_message)
-        _send_notification(result_message, context)
+        _send_slack_notification(result_message, context)
     else:
         result = []
     response = {
@@ -81,7 +82,7 @@ def _upload(key, file_data, context):
         except Exception as e:
             error_message = 'Error uploading ' + key
             print(error_message, e)
-            _send_notification(error_message, context)
+            _send_slack_notification(error_message, context)
     else:
         return False
 
@@ -107,7 +108,7 @@ def _get_schema_key(file_data):
     return key
 
 
-def _send_notification(message, context):
+def _send_slack_notification(message, context):
     topic_name = os.environ['TOPIC_NAME']
     account_id = context.invoked_function_arn.split(":")[4]
     if account_id != "Fake":
@@ -122,7 +123,21 @@ def _send_notification(message, context):
         print("Skipping notification: " + message)
 
 
-def sns_to_slack(event, context):
+def _send_schemas_notifications():
+    notification_endpoints_str = os.environ['NOTIFICATION_ENDPOINTS']
+    notification_endpoints = notification_endpoints_str.split(',')
+    notified = ""
+    for notification_endpoint in notification_endpoints:
+        print("Notifying: " + notification_endpoint)
+        r = requests.post(notification_endpoint)
+        if r.status_code == 200:
+            notified.join("Successfully notified: " + notification_endpoint + "\n")
+        else:
+            notified.join("Failed to notify: " + notification_endpoint + " (" + r.status_code + ")" + "\n")
+    return notified.strip()
+
+
+def sns_to_slack(event):
     print(event)
     sns = event['Records'][0]['Sns']
     message = sns['Message']
