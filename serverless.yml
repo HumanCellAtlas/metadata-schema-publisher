@@ -8,7 +8,7 @@ plugins:
 
 custom:
   metadata-schema-publisher: ${file(metadata-schema-publisher.yml)}
-  snsTopicName: ${self:custom.metadata-schema-publisher.name}-${self:custom.metadata-schema-publisher.notification-event}
+  snsTopicName: ${self:custom.metadata-schema-publisher.name}-${self:custom.metadata-schema-publisher.notification-event}-${self:custom.metadata-schema-publisher.stage}
   client:
     bucketName: ${self:custom.metadata-schema-publisher.bucket-name}
     distributionFolder: client
@@ -16,6 +16,7 @@ custom:
 provider:
   name: aws
   region: us-east-1
+  stage: ${self:custom.metadata-schema-publisher.stage}
   timeout: 300
   iamRoleStatements:
     - Effect: Allow
