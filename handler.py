@@ -6,7 +6,9 @@ import boto3
 import requests
 from github import Github, GithubException
 
+from release_prep import ReleasePreparation
 
+# TODO: change Githook to a manual trigger rather than trigger on merge into master
 def on_github_push(event, context):
     message = _process_event(event)
     ref = message["ref"]
@@ -46,6 +48,8 @@ def _process_directory(repo, server_path, context):
     print("Processing " + server_path + " in " + repo.name)
     created_list = []
     contents = repo.get_dir_contents(server_path)
+    versions_file = repo.get_contents(server_path + "/versions.json")
+    version_numbers = base64.b64decode(versions_file.content)
     for content in contents:
         if content.type == 'dir':
             created_list.extend(_process_directory(repo, content.path, context))
@@ -57,11 +61,14 @@ def _process_directory(repo, server_path, context):
                     print("- processing: " + path)
                     file_content = repo.get_contents(path)
                     file_data = base64.b64decode(file_content.content)
-                    key = _get_schema_key(file_data)
+
+                    expanded_file_data = ReleasePreparation.expandURLs(path, content.path, file_data, version_numbers)
+
+                    key = _get_schema_key(expanded_file_data)
                     if key is None:
                         print("- could not find key for: " + path)
                     else:
-                        created = _upload(key, file_data, context)
+                        created = _upload(key, expanded_file_data, context)
                         if created:
                             created_list.append(key)
                 else:
@@ -100,8 +107,8 @@ def _get_schema_key(file_data):
     file_json = json.loads(file_data)
     if 'id' in file_json:
         schema_id = file_json['id']
-        key = schema_id.replace(".json", "")
-        key = key.replace("https://schema.humancellatlas.org/", "")
+        key = schema_id._replace(".json", "")
+        key = key._replace("https://schema.humancellatlas.org/", "")
     else:
         key = None
     return key
