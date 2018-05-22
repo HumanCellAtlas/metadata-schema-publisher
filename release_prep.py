@@ -5,6 +5,7 @@ import pprint
 import os
 
 SCHEMA_BASE = "https://schema.humancellatlas.org/"
+SCHEMA_BASE_DEV = "https://schema.dev.humancellatlas.org/"
 
 class ReleasePreparation():
 
@@ -47,20 +48,29 @@ class ReleasePreparation():
     def _insertIntoDict(self, dict, obj, pos):
         return {k: v for k, v in (list(dict.items())[:pos] + list(obj.items()) + list(dict.items())[pos:])}
 
-    def expandURLs(self, path, schema, json, versions):
+    def expandURLs(self, path, schema, json, versions, context):
+        if context == "dev":
+            self.schema_base = SCHEMA_BASE_DEV
+        else:
+            self.schema_base = SCHEMA_BASE
+
         rel = schema.replace(path + "/", "")
         rel = rel.replace(".json", "")
-        version = self._findSchemaVersion(rel, versions)
+
+        if context == "dev":
+            version = "latest"
+        else:
+            version = self._findSchemaVersion(rel, versions)
 
         el = rel.split("/")
         el.insert(len(el) - 1, version)
 
-        id_url = SCHEMA_BASE + "/".join(el)
+        id_url = self.schema_base + "/".join(el)
         id = ({'id': id_url})
         newJson = self._insertIntoDict(json, id, 1)
 
         for item in self._findValue("$ref", newJson):
-            if SCHEMA_BASE not in item:
+            if self.schema_base not in item:
                 d = item.replace(".json", "")
 
                 if "#" in d:
@@ -71,12 +81,15 @@ class ReleasePreparation():
                             el.insert(i, v)
                             break
                 else:
-                    v = self._findSchemaVersion(d, versions)
+                    if context == "dev":
+                        v = "latest"
+                    else:
+                        v = self._findSchemaVersion(d, versions)
 
                     el = d.split("/")
                     el.insert(len(el) - 1, v)
 
-                expanded = SCHEMA_BASE + "/".join(el)
+                expanded = self.schema_base + "/".join(el)
 
                 self._replaceValue("$ref", newJson, item, expanded)
 
@@ -103,6 +116,8 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-p", "--path", dest="path",
                       help="Base path to the HCA metadata schemas", metavar="FILE")
+    parser.add_option("-c", "--context", dest="context",
+                      help="Release context")
 
     (options, args) = parser.parse_args()
 
@@ -121,10 +136,12 @@ if __name__ == '__main__':
 
     schemas = _getSchemaPaths(path)
 
+    context = options.context
+
     for s in schemas:
         jsonSchema = _getJson(s)
 
-        newJson = releasePrep.expandURLs(path, s, jsonSchema, versions)
+        newJson = releasePrep.expandURLs(path, s, jsonSchema, versions, context)
 
         pprint.pprint(newJson)
 

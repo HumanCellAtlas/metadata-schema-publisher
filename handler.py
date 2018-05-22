@@ -8,7 +8,7 @@ from github import Github, GithubException
 
 from release_prep import ReleasePreparation
 
-# TODO: change Githook to a manual trigger rather than trigger on merge into master
+# TODO: add Githook on merge into develop branch as well as merge into master
 def on_github_push(event, context):
     message = _process_event(event)
     ref = message["ref"]
@@ -61,8 +61,9 @@ def _process_directory(repo, server_path, context):
                     print("- processing: " + path)
                     file_content = repo.get_contents(path)
                     file_data = base64.b64decode(file_content.content)
-
-                    expanded_file_data = ReleasePreparation.expandURLs(path, content.path, file_data, version_numbers)
+                    # TODO: @dan.v: replace context in row below with a variable equal to "dev" for triggers
+                    # from merges into develop or null for merges into master
+                    expanded_file_data = ReleasePreparation.expandURLs(path, content.path, file_data, version_numbers, context)
 
                     key = _get_schema_key(expanded_file_data)
                     if key is None:
