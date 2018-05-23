@@ -1,6 +1,7 @@
 name: metadata-schema-publisher
 stage: prod
-bucket-name: schema.humancellatlas.org
+prod-bucket-name: schema.humancellatlas.org
+dev-bucket-name: schema.dev.humancellatlas.org
 api-key: 0a43698e4acb763d4713f2e1765a0d7622ab26be
 notification-event: notification
 slack-url: https://hooks.slack.com/services/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

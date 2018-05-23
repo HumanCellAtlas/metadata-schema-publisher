@@ -10,7 +10,7 @@ custom:
   metadata-schema-publisher: ${file(metadata-schema-publisher.yml)}
   snsTopicName: ${self:custom.metadata-schema-publisher.name}-${self:custom.metadata-schema-publisher.notification-event}-${self:custom.metadata-schema-publisher.stage}
   client:
-    bucketName: ${self:custom.metadata-schema-publisher.bucket-name}
+    bucketName: ${self:custom.metadata-schema-publisher.prod-bucket-name}
     distributionFolder: client
 
 provider:
@@ -24,7 +24,13 @@ provider:
         - s3:ListBucket
         - s3:PutObject
         - s3:PutObjectAcl
-      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.bucket-name}/*"
+      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.prod-bucket-name}/*"
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+        - s3:PutObject
+        - s3:PutObjectAcl
+      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.dev-bucket-name}/*"
     - Effect: Allow
       Action:
        - "sns:Publish"
@@ -36,7 +42,8 @@ functions:
     runtime: python3.6
     handler: handler.on_github_push
     environment:
-      BUCKET: ${self:custom.metadata-schema-publisher.bucket-name}
+      PROD_BUCKET: ${self:custom.metadata-schema-publisher.prod-bucket-name}
+      DEV_BUCKET: ${self:custom.metadata-schema-publisher.dev-bucket-name}
       API_KEY: ${self:custom.metadata-schema-publisher.api-key}
       TOPIC_NAME: ${self:custom.snsTopicName}
     events:
