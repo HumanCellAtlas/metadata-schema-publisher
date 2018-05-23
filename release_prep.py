@@ -7,6 +7,7 @@ import os
 SCHEMA_BASE = "https://schema.humancellatlas.org/"
 SCHEMA_BASE_DEV = "https://schema.dev.humancellatlas.org/"
 
+
 class ReleasePreparation():
 
     def _findSchemaVersion(self, schema, versions):
@@ -44,30 +45,29 @@ class ReleasePreparation():
                     if isinstance(d, dict):
                         self._replaceValue(key, d, old, new)
 
-
     def _insertIntoDict(self, dict, obj, pos):
         return {k: v for k, v in (list(dict.items())[:pos] + list(obj.items()) + list(dict.items())[pos:])}
 
-    def expandURLs(self, path, schema, json, versions, context):
-        if context == "dev":
+    def expandURLs(self, server_path, path, file_data, version_numbers, branch_name):
+        if branch_name == "develop":
             self.schema_base = SCHEMA_BASE_DEV
         else:
             self.schema_base = SCHEMA_BASE
 
-        rel = schema.replace(path + "/", "")
+        rel = path.replace(server_path + "/", "")
         rel = rel.replace(".json", "")
 
-        if context == "dev":
+        if branch_name == "develop":
             version = "latest"
         else:
-            version = self._findSchemaVersion(rel, versions)
+            version = self._findSchemaVersion(rel, version_numbers)
 
         el = rel.split("/")
         el.insert(len(el) - 1, version)
 
         id_url = self.schema_base + "/".join(el)
         id = ({'id': id_url})
-        newJson = self._insertIntoDict(json, id, 1)
+        newJson = self._insertIntoDict(file_data, id, 1)
 
         for item in self._findValue("$ref", newJson):
             if self.schema_base not in item:
@@ -81,7 +81,7 @@ class ReleasePreparation():
                             el.insert(i, v)
                             break
                 else:
-                    if context == "dev":
+                    if branch_name == "develop":
                         v = "latest"
                     else:
                         v = self._findSchemaVersion(d, versions)
@@ -99,6 +99,7 @@ class ReleasePreparation():
 def _getJson(path):
     f = open(path, 'r')
     return json.loads(f.read())
+
 
 def _saveJson(path, data):
     with open(path, 'w') as outfile:
@@ -144,4 +145,3 @@ if __name__ == '__main__':
         newJson = releasePrep.expandURLs(path, s, jsonSchema, versions, context)
 
         pprint.pprint(newJson)
-
