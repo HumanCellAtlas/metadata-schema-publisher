@@ -72,7 +72,7 @@ def _process_directory(repo, branch_name, server_path, version_numbers, context,
                     if key is None:
                         print("- could not find key for: " + path)
                     else:
-                        created = _upload(key, branch_name, data, context, dryrun)
+                        created = _upload(key, branch_name, expanded_file_data, context, dryrun)
                         if created:
                             created_list.append(key)
                 else:
@@ -84,6 +84,13 @@ def _process_directory(repo, branch_name, server_path, version_numbers, context,
 
 def _upload(key, branch_name, file_data, context, dryrun=False):
     if dryrun:
+        output_dir = 'dryrun'
+        output_path = output_dir + '/' + key
+        pos = output_path.rfind('/')
+        os.makedirs(output_path[0:pos], exist_ok=True)
+        with open(output_path, 'w') as outfile:
+            json.dump(file_data, outfile, indent=2)
+        print("Output: " + output_path)
         return True
     else:
         if branch_name == "develop":
@@ -93,7 +100,7 @@ def _upload(key, branch_name, file_data, context, dryrun=False):
         s3 = boto3.client('s3')
         if not _key_exists(s3, bucket, key):
             try:
-                s3.put_object(Bucket=bucket, Key=key, Body=file_data, ContentType='application/json', ACL='public-read')
+                s3.put_object(Bucket=bucket, Key=key, Body=json.dumps(file_data, indent=2), ContentType='application/json', ACL='public-read')
                 return True
             except Exception as e:
                 error_message = 'Error uploading ' + key
@@ -118,7 +125,7 @@ def _get_schema_key(file_data):
         schema_id = file_data['id']
         key = schema_id.replace(".json", "")
         key = key.replace("https://schema.humancellatlas.org/", "")
-        key = key.replace("https://schema.dev.humancellatlas.org/", "")
+        key = key.replace("https://schema.data.humancellatlas.org/", "")
     else:
         key = None
     return key
