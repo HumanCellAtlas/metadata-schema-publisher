@@ -40,6 +40,11 @@ serverless invoke --function onGithubPush --path ./tests/files/github-event-push
 serverless deploy -v
 ```
 
+## Current Deployment
+
+[metadata-schema-publisher-prod-onGithubPush](https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions/metadata-schema-publisher-prod-onGithubPush?tab=graph)
+`
+
 ###Logic
 
 - On GitHub [push](https://developer.github.com/v3/activity/events/types/#pushevent) event
