@@ -7,25 +7,28 @@ import requests
 from github import Github, GithubException
 
 
-def on_github_push(event, context):
+def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
     ref = message["ref"]
     if ref == "refs/heads/master":
         repo_name = message["repository"]["full_name"]
         pusher = message["pusher"]["name"]
-        api_key = os.environ['API_KEY']
+        api_key = "0a43698e4acb763d4713f2e1765a0d7622ab26be" #os.environ['API_KEY']
         repo = Github(api_key).get_repo(repo_name)
         notification_message = "Commit to " + ref + " detected on " + repo_name + " by " + pusher
         print(notification_message)
-        _send_notification(notification_message, context)
-        result = _process_directory(repo, 'json_schema', context)
+        _send_notification(notification_message, context, dryrun)
+        result = _process_directory(repo, 'json_schema', context, dryrun)
         result_str = "\n".join(result)
+        result_message = ""
+        if dryrun:
+            result_message = "DRY RUN - "
         if len(result) == 0:
-            result_message = "No schema changes published"
+            result_message = result_message + "No schema changes published"
         else:
-            result_message = "New schema changes published:\n" + result_str
+            result_message = result_message + "New schema changes published:\n" + result_str
         print(result_message)
-        _send_notification(result_message, context)
+        _send_notification(result_message, context, dryrun)
     else:
         result = []
     response = {
@@ -42,13 +45,13 @@ def _process_event(event):
     return message
 
 
-def _process_directory(repo, server_path, context):
+def _process_directory(repo, server_path, context, dryrun=False):
     print("Processing " + server_path + " in " + repo.name)
     created_list = []
     contents = repo.get_dir_contents(server_path)
     for content in contents:
         if content.type == 'dir':
-            created_list.extend(_process_directory(repo, content.path, context))
+            created_list.extend(_process_directory(repo, content.path, context, dryrun))
         else:
             try:
                 path = content.path
@@ -61,7 +64,10 @@ def _process_directory(repo, server_path, context):
                     if key is None:
                         print("- could not find key for: " + path)
                     else:
-                        created = _upload(key, file_data, context)
+                        if dryrun:
+                            created = True
+                        else:
+                            created = _upload(key, file_data, context)
                         if created:
                             created_list.append(key)
                 else:
@@ -71,7 +77,7 @@ def _process_directory(repo, server_path, context):
     return created_list
 
 
-def _upload(key, file_data, context):
+def _upload(key, file_data, context, dryrun=False):
     bucket = os.environ['BUCKET']
     s3 = boto3.client('s3')
     if not _key_exists(s3, bucket, key):
@@ -81,7 +87,7 @@ def _upload(key, file_data, context):
         except Exception as e:
             error_message = 'Error uploading ' + key
             print(error_message, e)
-            _send_notification(error_message, context)
+            _send_notification(error_message, context, dryrun)
     else:
         return False
 
@@ -107,19 +113,22 @@ def _get_schema_key(file_data):
     return key
 
 
-def _send_notification(message, context):
-    topic_name = os.environ['TOPIC_NAME']
-    account_id = context.invoked_function_arn.split(":")[4]
-    if account_id != "Fake":
-        print("Sending notification to " + topic_name)
-        topic_arn = "arn:aws:sns:" + os.environ['AWS_REGION'] + ":" + account_id + ":" + topic_name
-        sns = boto3.client(service_name="sns")
-        sns.publish(
-            TopicArn=topic_arn,
-            Message=message
-        )
+def _send_notification(message, context, dryrun=False):
+    if dryrun:
+        print(message)
     else:
-        print("Skipping notification: " + message)
+        topic_name = os.environ['TOPIC_NAME']
+        account_id = context.invoked_function_arn.split(":")[4]
+        if account_id != "Fake":
+            print("Sending notification to " + topic_name)
+            topic_arn = "arn:aws:sns:" + os.environ['AWS_REGION'] + ":" + account_id + ":" + topic_name
+            sns = boto3.client(service_name="sns")
+            sns.publish(
+                TopicArn=topic_arn,
+                Message=message
+            )
+        else:
+            print("Skipping notification: " + message)
 
 
 def sns_to_slack(event, context):
