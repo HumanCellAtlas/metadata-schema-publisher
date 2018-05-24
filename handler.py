@@ -24,7 +24,7 @@ def on_github_push(event, context, dryrun=False):
         server_path = 'json_schema'
         versions_file = repo.get_contents(server_path + "/versions.json", branch.name)
         version_numbers = base64.b64decode(versions_file.content)
-        result = _process_directory(repo, branch.name, server_path, version_numbers, context, dryrun)
+        result = _process_directory(repo, branch.name, server_path, server_path, version_numbers, context, dryrun)
         result_str = "\n".join(result)
         result_message = ""
         if len(result) == 0:
@@ -49,13 +49,13 @@ def _process_event(event):
     return message
 
 
-def _process_directory(repo, branch_name, server_path, version_numbers, context, dryrun=False):
+def _process_directory(repo, branch_name, base_server_path, server_path, version_numbers, context, dryrun=False):
     print("Processing " + server_path + " in " + branch_name + " branch of " + repo.name)
     created_list = []
     contents = repo.get_dir_contents(server_path, branch_name)
     for content in contents:
         if content.type == 'dir':
-            created_list.extend(_process_directory(repo, branch_name, content.path, version_numbers, context, dryrun))
+            created_list.extend(_process_directory(repo, branch_name, base_server_path, content.path, version_numbers, context, dryrun))
         else:
             try:
                 path = content.path
@@ -66,7 +66,7 @@ def _process_directory(repo, branch_name, server_path, version_numbers, context,
                     data = base64.b64decode(file_content.content)
                     json_data = json.loads(data.decode('utf8'))
                     release_preparation = ReleasePreparation()
-                    expanded_file_data = release_preparation.expandURLs(server_path, path, json_data, version_numbers,
+                    expanded_file_data = release_preparation.expandURLs(base_server_path, path, json_data, version_numbers,
                                                                         branch_name)
                     key = _get_schema_key(expanded_file_data)
                     if key is None:
@@ -125,7 +125,7 @@ def _get_schema_key(file_data):
         schema_id = file_data['id']
         key = schema_id.replace(".json", "")
         key = key.replace("https://schema.humancellatlas.org/", "")
-        key = key.replace("https://schema.data.humancellatlas.org/", "")
+        key = key.replace("http://schema.data.humancellatlas.org/", "")
     else:
         key = None
     return key

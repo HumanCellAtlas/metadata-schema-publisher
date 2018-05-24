@@ -5,7 +5,7 @@ import pprint
 import os
 
 SCHEMA_BASE = "https://schema.humancellatlas.org/"
-SCHEMA_BASE_DEV = "https://schema.data.humancellatlas.org/"
+SCHEMA_BASE_DEV = "http://schema.data.humancellatlas.org/"
 
 
 class ReleasePreparation():
@@ -48,13 +48,13 @@ class ReleasePreparation():
     def _insertIntoDict(self, dict, obj, pos):
         return {k: v for k, v in (list(dict.items())[:pos] + list(obj.items()) + list(dict.items())[pos:])}
 
-    def expandURLs(self, server_path, path, file_data, version_numbers, branch_name):
+    def expandURLs(self, base_server_path, path, file_data, version_numbers, branch_name):
         if branch_name == "develop":
             self.schema_base = SCHEMA_BASE_DEV
         else:
             self.schema_base = SCHEMA_BASE
 
-        rel = path.replace(server_path + "/", "")
+        rel = path.replace(base_server_path + "/", "")
         rel = rel.replace(".json", "")
 
         if branch_name == "develop":
