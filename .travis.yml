@@ -1,0 +1,23 @@
+
+language: python
+python:
+  - "3.6"
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+  - pip list
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+script:
+  - nosetests --with-coverage --cover-erase --cover-package=broker --cover-xml
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+notifications:
+  - slack: humancellatlas:VpHVbri4SQhHvnYQ5abP8t5f
+env:
+  global:
+    - CC_TEST_REPORTER_ID=8f5f5cb6b62c2fa724107bd74656d102369635842755bc9d1084689f966758c5
