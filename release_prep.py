@@ -100,10 +100,9 @@ def _getJson(path):
     f = open(path, 'r')
     return json.loads(f.read())
 
-
 def _saveJson(path, data):
     with open(path, 'w') as outfile:
-        json.dump(data, outfile)
+        json.dump(data, outfile, indent=4, sort_keys=True)
 
 
 def _getSchemaPaths(path):
@@ -144,4 +143,4 @@ if __name__ == '__main__':
 
         newJson = releasePrep.expandURLs(path, s, jsonSchema, versions, context)
 
-        pprint.pprint(newJson)
+        _saveJson(s, newJson)
