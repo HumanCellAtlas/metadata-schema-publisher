@@ -23,7 +23,8 @@ def on_github_push(event, context, dryrun=False):
         _send_notification(notification_message, context, dryrun)
         server_path = 'json_schema'
         versions_file = repo.get_contents(server_path + "/versions.json", branch.name)
-        version_numbers = base64.b64decode(versions_file.content)
+        version_numbers_str = base64.b64decode(versions_file.content).decode("utf-8")
+        version_numbers = json.loads(version_numbers_str)
         result = _process_directory(repo, branch.name, server_path, server_path, version_numbers, context, dryrun)
         result_str = "\n".join(result)
         result_message = ""
@@ -61,7 +62,7 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
             try:
                 path = content.path
                 file_root, file_extension = os.path.splitext(path)
-                if file_extension == '.json':
+                if file_extension == '.json' and not path.endswith('versions.json'):
                     print("- processing: " + path)
                     file_content = repo.get_contents(path, branch_name)
                     data = base64.b64decode(file_content.content)
