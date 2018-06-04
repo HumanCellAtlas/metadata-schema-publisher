@@ -84,7 +84,7 @@ class ReleasePreparation():
                     if branch_name == "develop":
                         v = "latest"
                     else:
-                        v = self._findSchemaVersion(d, versions)
+                        v = self._findSchemaVersion(d, version_numbers)
 
                     el = d.split("/")
                     el.insert(len(el) - 1, v)
