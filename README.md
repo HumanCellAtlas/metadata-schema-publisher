@@ -47,30 +47,9 @@ serverless deploy -v
 
 ###Logic
 
-- On GitHub [push](https://developer.github.com/v3/activity/events/types/#pushevent) event
-- Go through all files ending with .json in the json_schema folder in the rep
+- On GitHub [push](https://developer.github.com/v3/activity/events/types/#pushevent) event from [WebHook](https://github.com/HumanCellAtlas/metadata-schema/settings/hooks)
+- Go through all files ending with .json in the json_schema folder in the rep and update content to reflect latest versions in version.json
 - Check the id field in each schema and use that as the key of S3
 - Check if the S3 key exists and if not upload the file
 - Send notifications for when the process starts and a summary when it finishes
 
-
-## TODO
-- ~~Update README.md~~
-- ~~Remove JavaScript~~
-- ~~Rename project to something starting metadata~~
-- ~~Change region of deployment~~
-- ~~Change to actual Github repo~~
-- ~~Chnage to schema.humancellatlas.org bucket~~
-- ~~Change to responding to commits instead of releases~~
-- ~~Add Slack notifications to a HCA slack channel~~
-  ~~- For triggered~~
-  ~~- For results~~
-- ~~Check index.html works when shifts to schema.humacellatlas.org~~
-- Consider adding CloudFront (with 5 min cache)
-- Encrypt API key and Slack URL
-- Add and check secret from webhook
-- ~~Add user that performed the push to notification~~
-- ~~See if we need to specifiy the mime type~~
-- Consider how to return 200 to webhook quickly to stop it showing failed
-
-    
