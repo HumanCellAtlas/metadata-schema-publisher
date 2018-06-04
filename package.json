@@ -28,6 +28,6 @@
     "simple-git": "^1.89.0"
   },
   "devDependencies": {
-    "serverless": "^1.26.0"
+    "serverless": "^1.27.3"
   }
 }

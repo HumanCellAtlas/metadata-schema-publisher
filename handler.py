@@ -12,8 +12,7 @@ from release_prep import ReleasePreparation
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
     ref = message["ref"]
-    if ref == "refs/heads/develop":
-        # if ref == "refs/heads/master" or ref == "refs/heads/develop":
+    if ref == "refs/heads/master" or ref == "refs/heads/develop":
         repo_name = message["repository"]["full_name"]
         pusher = message["pusher"]["name"]
         api_key = os.environ['API_KEY']

@@ -1,5 +1,5 @@
 name: metadata-schema-publisher
-stage: dev
+stage: prod
 prod-bucket-name: schema.humancellatlas.org
 dev-bucket-name: schema.dev.data.humancellatlas.org
 api-key: 0a43698e4acb763d4713f2e1765a0d7622ab26be
