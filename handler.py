@@ -12,7 +12,8 @@ from release_prep import ReleasePreparation
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
     ref = message["ref"]
-    if ref == "refs/heads/master" or ref == "refs/heads/develop":
+    if ref == "refs/heads/develop":
+        # if ref == "refs/heads/master" or ref == "refs/heads/develop":
         repo_name = message["repository"]["full_name"]
         pusher = message["pusher"]["name"]
         api_key = os.environ['API_KEY']
@@ -55,7 +56,8 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
     contents = repo.get_dir_contents(server_path, branch_name)
     for content in contents:
         if content.type == 'dir':
-            created_list.extend(_process_directory(repo, branch_name, base_server_path, content.path, version_numbers, context, dryrun))
+            created_list.extend(
+                _process_directory(repo, branch_name, base_server_path, content.path, version_numbers, context, dryrun))
         else:
             try:
                 path = content.path
@@ -66,7 +68,8 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
                     data = base64.b64decode(file_content.content)
                     json_data = json.loads(data.decode('utf8'))
                     release_preparation = ReleasePreparation()
-                    expanded_file_data = release_preparation.expandURLs(base_server_path, path, json_data, version_numbers,
+                    expanded_file_data = release_preparation.expandURLs(base_server_path, path, json_data,
+                                                                        version_numbers,
                                                                         branch_name)
                     key = _get_schema_key(expanded_file_data)
                     if key is None:
@@ -93,14 +96,16 @@ def _upload(key, branch_name, file_data, context, dryrun=False):
         print("Output: " + output_path)
         return True
     else:
-        if branch_name == "develop":
+        is_develop = branch_name == "develop"
+        if is_develop:
             bucket = os.environ['DEV_BUCKET']
         else:
             bucket = os.environ['PROD_BUCKET']
         s3 = boto3.client('s3')
-        if not _key_exists(s3, bucket, key):
+        if (not _key_exists(s3, bucket, key)) or is_develop:
             try:
-                s3.put_object(Bucket=bucket, Key=key, Body=json.dumps(file_data, indent=2), ContentType='application/json', ACL='public-read')
+                s3.put_object(Bucket=bucket, Key=key, Body=json.dumps(file_data, indent=2),
+                              ContentType='application/json', ACL='public-read')
                 return True
             except Exception as e:
                 error_message = 'Error uploading ' + key
@@ -125,7 +130,7 @@ def _get_schema_key(file_data):
         schema_id = file_data['id']
         key = schema_id.replace(".json", "")
         key = key.replace("https://schema.humancellatlas.org/", "")
-        key = key.replace("http://schema.data.humancellatlas.org/", "")
+        key = key.replace("http://schema.dev.data.humancellatlas.org/", "")
     else:
         key = None
     return key
