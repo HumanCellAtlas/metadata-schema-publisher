@@ -5,7 +5,7 @@ import pprint
 import os
 
 SCHEMA_BASE = "https://schema.humancellatlas.org/"
-SCHEMA_BASE_DEV = "http://schema.data.humancellatlas.org/"
+SCHEMA_BASE_DEV = "http://schema.dev.data.humancellatlas.org/"
 
 
 class ReleasePreparation():
