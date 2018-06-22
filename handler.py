@@ -97,8 +97,11 @@ def _upload(key, branch_name, file_data, context, dryrun=False):
         return True
     else:
         is_develop = branch_name == "develop"
+        is_staging = branch_name == "staging"
         if is_develop:
             bucket = os.environ['DEV_BUCKET']
+        elif is_staging:
+            bucket = os.environ['STAGING_BUCKET']
         else:
             bucket = os.environ['PROD_BUCKET']
         s3 = boto3.client('s3')
@@ -131,6 +134,7 @@ def _get_schema_key(file_data):
         key = schema_id.replace(".json", "")
         key = key.replace("https://schema.humancellatlas.org/", "")
         key = key.replace("http://schema.dev.data.humancellatlas.org/", "")
+        key = key.replace("http://schema.staging.data.humancellatlas.org/", "")
     else:
         key = None
     return key

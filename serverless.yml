@@ -43,6 +43,7 @@ functions:
     handler: handler.on_github_push
     environment:
       PROD_BUCKET: ${self:custom.metadata-schema-publisher.prod-bucket-name}
+      STAGING_BUCKET: ${self:custom.metadata-schema-publisher.staging-bucket-name}
       DEV_BUCKET: ${self:custom.metadata-schema-publisher.dev-bucket-name}
       API_KEY: ${self:custom.metadata-schema-publisher.api-key}
       TOPIC_NAME: ${self:custom.snsTopicName}

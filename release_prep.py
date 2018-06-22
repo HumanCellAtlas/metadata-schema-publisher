@@ -1,10 +1,9 @@
 import json
-from optparse import OptionParser
-import pprint
-
 import os
+from optparse import OptionParser
 
 SCHEMA_BASE = "https://schema.humancellatlas.org/"
+SCHEMA_BASE_STAGING = "http://schema.staging.data.humancellatlas.org/"
 SCHEMA_BASE_DEV = "http://schema.dev.data.humancellatlas.org/"
 
 
@@ -51,6 +50,8 @@ class ReleasePreparation():
     def expandURLs(self, base_server_path, path, file_data, version_numbers, branch_name):
         if branch_name == "develop":
             self.schema_base = SCHEMA_BASE_DEV
+        elif branch_name == "staging":
+            self.schema_base = SCHEMA_BASE_STAGING
         else:
             self.schema_base = SCHEMA_BASE
 
