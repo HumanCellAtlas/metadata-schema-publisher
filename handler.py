@@ -12,7 +12,7 @@ from release_prep import ReleasePreparation
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
     ref = message["ref"]
-    if ref == "refs/heads/master" or ref == "refs/heads/develop":
+    if ref == "refs/heads/master" or ref == "refs/heads/develop" or ref == "refs/heads/integration" or ref == "refs/heads/staging":
         repo_name = message["repository"]["full_name"]
         pusher = message["pusher"]["name"]
         api_key = os.environ['API_KEY']
@@ -96,9 +96,17 @@ def _upload(key, branch_name, file_data, context, dryrun=False):
         print("Output: " + output_path)
         return True
     else:
+        # TO DO - Alegria please double-check
         is_develop = branch_name == "develop"
+        is_integration = branch_name == "integration"
+        is_staging = branch_name == "staging"
+
         if is_develop:
             bucket = os.environ['DEV_BUCKET']
+        elif is_integration:
+            bucket = os.environ['INT_BUCKET']
+        elif is_staging:
+            bucket = os.environ['STAG_BUCKET']
         else:
             bucket = os.environ['PROD_BUCKET']
         s3 = boto3.client('s3')
@@ -131,6 +139,8 @@ def _get_schema_key(file_data):
         key = schema_id.replace(".json", "")
         key = key.replace("https://schema.humancellatlas.org/", "")
         key = key.replace("http://schema.dev.data.humancellatlas.org/", "")
+        key = key.replace("http://schema.integration.data.humancellatlas.org/", "")
+        key = key.replace("http://schema.staging.data.humancellatlas.org/", "")
     else:
         key = None
     return key
