@@ -1,23 +1,31 @@
 import base64
+import boto3
 import json
 import os
-
-import boto3
 import requests
+
 from github import Github, GithubException
 
 from release_prep import ReleasePreparation
+
+BRANCH_CONFIG = {
+    'develop': 'DEV_BUCKET',
+    'integration': 'INTEGRATION_BUCKET',
+    'staging': 'STAGING_BUCKET',
+    'master': 'PROD_BUCKET'
+}
 
 
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
     ref = message["ref"]
-    if ref == "refs/heads/master" or ref == "refs/heads/develop" or ref == "refs/heads/integration" or ref == "refs/heads/staging":
-        repo_name = message["repository"]["full_name"]
+    api_key = os.environ['API_KEY']
+    repo_name = message["repository"]["full_name"]
+    repo = Github(api_key).get_repo(repo_name)
+    branch = repo.get_branch(ref)
+
+    if BRANCH_CONFIG.get(branch.name):
         pusher = message["pusher"]["name"]
-        api_key = os.environ['API_KEY']
-        repo = Github(api_key).get_repo(repo_name)
-        branch = repo.get_branch(ref)
         notification_message = "Commit to " + ref + " detected on " + repo_name + " branch " + branch.name + " by " + pusher
         print(notification_message)
         _send_notification(notification_message, context, dryrun)
@@ -25,6 +33,7 @@ def on_github_push(event, context, dryrun=False):
         versions_file = repo.get_contents(server_path + "/versions.json", branch.name)
         version_numbers_str = base64.b64decode(versions_file.content).decode("utf-8")
         version_numbers = json.loads(version_numbers_str)
+
         result = _process_directory(repo, branch.name, server_path, server_path, version_numbers, context, dryrun)
         result_str = "\n".join(result)
         result_message = ""
@@ -96,21 +105,13 @@ def _upload(key, branch_name, file_data, context, dryrun=False):
         print("Output: " + output_path)
         return True
     else:
-        # TO DO - Alegria please double-check
-        is_develop = branch_name == "develop"
-        is_integration = branch_name == "integration"
-        is_staging = branch_name == "staging"
+        bucket_env_var = BRANCH_CONFIG.get(branch_name)
 
-        if is_develop:
-            bucket = os.environ['DEV_BUCKET']
-        elif is_integration:
-            bucket = os.environ['INT_BUCKET']
-        elif is_staging:
-            bucket = os.environ['STAG_BUCKET']
-        else:
-            bucket = os.environ['PROD_BUCKET']
+        bucket = os.environ[bucket_env_var]
+
         s3 = boto3.client('s3')
-        if (not _key_exists(s3, bucket, key)) or is_develop:
+
+        if not _key_exists(s3, bucket, key):
             try:
                 s3.put_object(Bucket=bucket, Key=key, Body=json.dumps(file_data, indent=2),
                               ContentType='application/json', ACL='public-read')
