@@ -6,7 +6,7 @@ import os
 
 SCHEMA_BASE = "https://schema.humancellatlas.org/"
 SCHEMA_BASE_DEV = "http://schema.dev.data.humancellatlas.org/"
-SCHEMA_BASE_INT = "http://schema.integratin.data.humancellatlas.org/"
+SCHEMA_BASE_INT = "http://schema.integration.data.humancellatlas.org/"
 SCHEMA_BASE_STAG = "http://schema.staging.data.humancellatlas.org/"
 
 
