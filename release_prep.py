@@ -6,6 +6,8 @@ import os
 
 SCHEMA_BASE = "https://schema.humancellatlas.org/"
 SCHEMA_BASE_DEV = "http://schema.dev.data.humancellatlas.org/"
+SCHEMA_BASE_INT = "http://schema.integration.data.humancellatlas.org/"
+SCHEMA_BASE_STAG = "http://schema.staging.data.humancellatlas.org/"
 
 
 class ReleasePreparation():
@@ -51,16 +53,20 @@ class ReleasePreparation():
     def expandURLs(self, base_server_path, path, file_data, version_numbers, branch_name):
         if branch_name == "develop":
             self.schema_base = SCHEMA_BASE_DEV
+        elif branch_name == "integration":
+            self.schema_base = SCHEMA_BASE_INT
+        elif branch_name == "staging":
+            self.schema_base = SCHEMA_BASE_STAG
         else:
             self.schema_base = SCHEMA_BASE
 
         rel = path.replace(base_server_path + "/", "")
         rel = rel.replace(".json", "")
 
-        if branch_name == "develop":
-            version = "latest"
-        else:
-            version = self._findSchemaVersion(rel, version_numbers)
+        # if branch_name == "develop":
+        #     version = "latest"
+        # else:
+        version = self._findSchemaVersion(rel, version_numbers)
 
         el = rel.split("/")
         el.insert(len(el) - 1, version)
@@ -81,10 +87,10 @@ class ReleasePreparation():
                             el.insert(i, v)
                             break
                 else:
-                    if branch_name == "develop":
-                        v = "latest"
-                    else:
-                        v = self._findSchemaVersion(d, version_numbers)
+                    # if branch_name == "develop":
+                    #     v = "latest"
+                    # else:
+                    v = self._findSchemaVersion(d, version_numbers)
 
                     el = d.split("/")
                     el.insert(len(el) - 1, v)
