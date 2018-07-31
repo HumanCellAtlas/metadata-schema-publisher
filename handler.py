@@ -135,8 +135,8 @@ def _key_exists(s3, bucket, key):
 
 
 def _get_schema_key(file_data):
-    if 'id' in file_data:
-        schema_id = file_data['id']
+    if '$id' in file_data:
+        schema_id = file_data['$id']
         key = schema_id.replace(".json", "")
         key = key.replace("https://schema.humancellatlas.org/", "")
         key = key.replace("http://schema.dev.data.humancellatlas.org/", "")
