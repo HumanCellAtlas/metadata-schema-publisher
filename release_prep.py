@@ -72,7 +72,7 @@ class ReleasePreparation():
         el.insert(len(el) - 1, version)
 
         id_url = self.schema_base + "/".join(el)
-        id = ({'id': id_url})
+        id = ({'$id': id_url})
         newJson = self._insertIntoDict(file_data, id, 1)
 
         for item in self._findValue("$ref", newJson):
