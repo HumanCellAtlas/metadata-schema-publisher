@@ -53,5 +53,5 @@ serverless deploy -v
 - Check if the S3 key exists and if not upload the file
 - Send notifications for when the process starts and a summary when it finishes
 
-### Setting up new schema environments
+## Setting up new schema environments
 See notes: https://docs.google.com/document/d/1FQo9ofrFTSqLKx2a6eCHqTIpJxhAtShlCVkx6j6yA6s/edit
