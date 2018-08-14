@@ -15,6 +15,13 @@ BRANCH_CONFIG = {
     'master': 'PROD_BUCKET'
 }
 
+SCHEMA_ID_KEY = {
+    'develop': '$id',
+    'integration': 'id',
+    'staging': 'id',
+    'master': 'id'
+}
+
 
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
@@ -80,7 +87,7 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
                     expanded_file_data = release_preparation.expandURLs(base_server_path, path, json_data,
                                                                         version_numbers,
                                                                         branch_name)
-                    key = _get_schema_key(expanded_file_data)
+                    key = _get_schema_key(expanded_file_data, branch_name)
                     if key is None:
                         print("- could not find key for: " + path)
                     else:
@@ -134,9 +141,10 @@ def _key_exists(s3, bucket, key):
             return obj['Size']
 
 
-def _get_schema_key(file_data):
-    if '$id' in file_data:
-        schema_id = file_data['$id']
+def _get_schema_key(file_data, branch_name):
+    schema_id_key = SCHEMA_ID_KEY[branch_name]
+    if schema_id_key in file_data:
+        schema_id = file_data[schema_id_key]
         key = schema_id.replace(".json", "")
         key = key.replace("https://schema.humancellatlas.org/", "")
         key = key.replace("http://schema.dev.data.humancellatlas.org/", "")
