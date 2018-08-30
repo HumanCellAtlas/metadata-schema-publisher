@@ -9,12 +9,6 @@ SCHEMA_BASE_DEV = "http://schema.dev.data.humancellatlas.org/"
 SCHEMA_BASE_INT = "http://schema.integration.data.humancellatlas.org/"
 SCHEMA_BASE_STAG = "http://schema.staging.data.humancellatlas.org/"
 
-SCHEMA_ID_KEY = {
-    'develop': '$id',
-    'integration': 'id',
-    'staging': 'id',
-    'master': 'id'
-}
 
 class ReleasePreparation():
 
@@ -78,7 +72,12 @@ class ReleasePreparation():
         el.insert(len(el) - 1, version)
 
         id_url = self.schema_base + "/".join(el)
-        id_key = SCHEMA_ID_KEY[branch_name]
+
+        if "draft-04" in file_data["$schema"]:
+            id_key = "id"
+        else:
+            id_key = "$id"
+
         id = ({id_key: id_url})
         newJson = self._insertIntoDict(file_data, id, 1)
 
