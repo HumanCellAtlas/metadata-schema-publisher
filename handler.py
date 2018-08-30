@@ -15,13 +15,6 @@ BRANCH_CONFIG = {
     'master': 'PROD_BUCKET'
 }
 
-SCHEMA_ID_KEY = {
-    'develop': '$id',
-    'integration': 'id',
-    'staging': 'id',
-    'master': 'id'
-}
-
 
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
@@ -142,7 +135,10 @@ def _key_exists(s3, bucket, key):
 
 
 def _get_schema_key(file_data, branch_name):
-    schema_id_key = SCHEMA_ID_KEY[branch_name]
+    if "draft-04" in file_data["$schema"]:
+        schema_id_key = "id"
+    else:
+        schema_id_key = "$id"
     if schema_id_key in file_data:
         schema_id = file_data[schema_id_key]
         key = schema_id.replace(".json", "")
