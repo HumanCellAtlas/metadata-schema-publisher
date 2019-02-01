@@ -15,6 +15,21 @@ BRANCH_CONFIG = {
     'master': 'PROD_BUCKET'
 }
 
+INGEST_API = {
+    'develop': 'https://api.ingest.dev.data.humancellatlas.org',
+    'integration': 'https://api.ingest.integration.data.humancellatlas.org',
+    'staging': 'https://api.ingest.staging.data.humancellatlas.org',
+    'master': 'https://api.ingest.data.humancellatlas.org'
+}
+
+
+def _notify_ingest(branch_name):
+    ingest_base_url = INGEST_API.get(branch_name)
+    schema_update_url = f'{ingest_base_url}/schemas/update'
+    r = requests.post(schema_update_url)
+    r.raise_for_status()
+    print('Notified Ingest!')
+
 
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
@@ -22,9 +37,13 @@ def on_github_push(event, context, dryrun=False):
     api_key = os.environ['API_KEY']
     repo_name = message["repository"]["full_name"]
     repo = Github(api_key).get_repo(repo_name)
-    branch = repo.get_branch(ref)
+    branch = None
+    try:
+        branch = repo.get_branch(ref)
+    except GithubException as e:
+        print(f"An error occured when retrieving the branch: {str(e)}")
 
-    if BRANCH_CONFIG.get(branch.name):
+    if branch and BRANCH_CONFIG.get(branch.name):
         pusher = message["pusher"]["name"]
         notification_message = "Commit to " + ref + " detected on " + repo_name + " branch " + branch.name + " by " + pusher
         print(notification_message)
@@ -41,10 +60,13 @@ def on_github_push(event, context, dryrun=False):
             result_message = result_message + "No schema changes published"
         else:
             result_message = result_message + "New schema changes published:\n" + result_str
+            _notify_ingest(branch.name)
         print(result_message)
         _send_notification(result_message, context, dryrun)
+
     else:
         result = []
+
     response = {
         "statusCode": 200,
         "body": {
@@ -143,9 +165,9 @@ def _get_schema_key(file_data, branch_name):
         schema_id = file_data[schema_id_key]
         key = schema_id.replace(".json", "")
         key = key.replace("https://schema.humancellatlas.org/", "")
-        key = key.replace("http://schema.dev.data.humancellatlas.org/", "")
-        key = key.replace("http://schema.integration.data.humancellatlas.org/", "")
-        key = key.replace("http://schema.staging.data.humancellatlas.org/", "")
+        key = key.replace("https://schema.dev.data.humancellatlas.org/", "")
+        key = key.replace("https://schema.integration.data.humancellatlas.org/", "")
+        key = key.replace("https://schema.staging.data.humancellatlas.org/", "")
     else:
         key = None
     return key
