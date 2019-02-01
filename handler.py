@@ -136,7 +136,7 @@ def _upload(key, branch_name, file_data, context, dryrun=False):
         if not _key_exists(s3, bucket, key):
             try:
                 s3.put_object(Bucket=bucket, Key=key, Body=json.dumps(file_data, indent=2),
-                              ContentType='application/json', ACL='public-read')
+                              ContentType='application/json', ACL='public-read', CacheControl="no-cache")
                 return True
             except Exception as e:
                 error_message = 'Error uploading ' + key
