@@ -5,9 +5,9 @@ import pprint
 import os
 
 SCHEMA_BASE = "https://schema.humancellatlas.org/"
-SCHEMA_BASE_DEV = "http://schema.dev.data.humancellatlas.org/"
-SCHEMA_BASE_INT = "http://schema.integration.data.humancellatlas.org/"
-SCHEMA_BASE_STAG = "http://schema.staging.data.humancellatlas.org/"
+SCHEMA_BASE_DEV = "https://schema.dev.data.humancellatlas.org/"
+SCHEMA_BASE_INT = "https://schema.integration.data.humancellatlas.org/"
+SCHEMA_BASE_STAG = "https://schema.staging.data.humancellatlas.org/"
 
 
 class ReleasePreparation():
