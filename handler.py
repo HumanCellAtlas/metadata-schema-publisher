@@ -98,11 +98,16 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
                     file_content = repo.get_contents(path, branch_name)
                     data = base64.b64decode(file_content.content)
                     json_data = json.loads(data.decode('utf8'))
-                    release_preparation = ReleasePreparation()
-                    expanded_file_data = release_preparation.expandURLs(base_server_path, path, json_data,
+
+                    if not path.endswith('property_migrations.json'):
+                        release_preparation = ReleasePreparation()
+                        expanded_file_data = release_preparation.expandURLs(base_server_path, path, json_data,
                                                                         version_numbers,
                                                                         branch_name)
-                    key = _get_schema_key(expanded_file_data, branch_name)
+                        key = _get_schema_key(expanded_file_data, branch_name)
+                    else:
+                        expanded_file_data = json_data
+                        key = "property_migrations"
                     if key is None:
                         print("- could not find key for: " + path)
                     else:
