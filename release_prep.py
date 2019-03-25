@@ -2,23 +2,10 @@ import json
 import os
 from optparse import OptionParser
 
-SCHEMA_BASE = "https://schema.humancellatlas.org/"
-SCHEMA_BASE_DEV = "https://schema.dev.data.humancellatlas.org/"
-SCHEMA_BASE_INT = "https://schema.integration.data.humancellatlas.org/"
-SCHEMA_BASE_STAG = "https://schema.staging.data.humancellatlas.org/"
-
-SCHEMA_URL = {
-    'master': 'https://schema.humancellatlas.org/',
-    'develop': 'https://schema.dev.data.humancellatlas.org/',
-    'integration': 'https://schema.integration.data.humancellatlas.org/',
-    'staging': 'https://schema.staging.data.humancellatlas.org/'
-
-}
-
 
 class ReleasePreparation:
-    def __init__(self, branch_name, version_map):
-        self.schema_base = SCHEMA_URL.get(branch_name)
+    def __init__(self, schema_url, version_map):
+        self.schema_url = schema_url
         self.version_map = version_map
 
     def _find_schema_version(self, schema):
@@ -65,7 +52,7 @@ class ReleasePreparation:
         el = relative_path.split("/")
         el.insert(len(el) - 1, version)
 
-        id_url = self.schema_base + "/".join(el)
+        id_url = self.schema_url + "/".join(el)
 
         if "draft-04" in file_data["$schema"]:
             id_key = "id"
@@ -76,7 +63,7 @@ class ReleasePreparation:
         new_json = self._insert_into_dict(file_data, id, 1)
 
         for item in self._find_value("$ref", new_json):
-            if self.schema_base not in item:
+            if self.schema_url not in item:
                 d = item.replace(".json", "")
 
                 if "#" in d:
@@ -92,7 +79,7 @@ class ReleasePreparation:
                     el = d.split("/")
                     el.insert(len(el) - 1, v)
 
-                expanded = self.schema_base + "/".join(el)
+                expanded = self.schema_url + "/".join(el)
 
                 self._replace_value("$ref", new_json, item, expanded)
 

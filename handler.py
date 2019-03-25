@@ -8,6 +8,8 @@ from github import Github, GithubException
 
 from release_prep import ReleasePreparation
 
+BRANCH_REFS = ['refs/heads/master', 'refs/heads/staging', 'refs/heads/integration', 'refs/heads/develop']
+
 BRANCH_CONFIG = {
     'develop': 'DEV_BUCKET',
     'integration': 'INTEGRATION_BUCKET',
@@ -22,6 +24,17 @@ INGEST_API = {
     'master': 'https://api.ingest.data.humancellatlas.org'
 }
 
+SCHEMA_URL = {
+    'master': 'https://schema.humancellatlas.org/',
+    'develop': 'https://schema.dev.data.humancellatlas.org/',
+    'integration': 'https://schema.integration.data.humancellatlas.org/',
+    'staging': 'https://schema.staging.data.humancellatlas.org/'
+
+}
+
+UNVERSIONED_FILES = [
+    'property_migrations'
+]
 
 def _notify_ingest(branch_name):
     ingest_base_url = INGEST_API.get(branch_name)
@@ -34,16 +47,12 @@ def _notify_ingest(branch_name):
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
     ref = message["ref"]
-    api_key = os.environ['API_KEY']
-    repo_name = message["repository"]["full_name"]
-    repo = Github(api_key).get_repo(repo_name)
-    branch = None
-    try:
-        branch = repo.get_branch(ref)
-    except GithubException as e:
-        print(f"An error occured when retrieving the branch: {str(e)}")
 
-    if branch and BRANCH_CONFIG.get(branch.name):
+    if ref in BRANCH_REFS:
+        api_key = os.environ['API_KEY']
+        repo_name = message["repository"]["full_name"]
+        repo = Github(api_key).get_repo(repo_name)
+        branch = repo.get_branch(ref)
         pusher = message["pusher"]["name"]
         notification_message = "Commit to " + ref + " detected on " + repo_name + " branch " + branch.name + " by " + pusher
         print(notification_message)
@@ -56,6 +65,7 @@ def on_github_push(event, context, dryrun=False):
         result = _process_directory(repo, branch.name, server_path, server_path, version_numbers, context, dryrun)
         result_str = "\n".join(result)
         result_message = ""
+
         if len(result) == 0:
             result_message = result_message + "No schema changes published"
         else:
@@ -98,16 +108,19 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
                     file_content = repo.get_contents(path, branch_name)
                     data = base64.b64decode(file_content.content)
                     json_data = json.loads(data.decode('utf8'))
+                    relative_path = path.replace(base_server_path + "/", "")
+                    relative_path = relative_path.replace(".json", "")
+                    key = None
 
-                    if not path.endswith('property_migrations.json'):
-                        release_preparation = ReleasePreparation(branch_name=branch_name, version_map=version_numbers)
-                        relative_path = path.replace(base_server_path + "/", "")
-                        relative_path = relative_path.replace(".json", "")
+                    if relative_path in UNVERSIONED_FILES:
+                        expanded_file_data = json_data
+                        key = relative_path
+                    else:
+                        schema_url = SCHEMA_URL.get(branch_name)
+                        release_preparation = ReleasePreparation(schema_url=schema_url, version_map=version_numbers)
                         expanded_file_data = release_preparation.expand_urls(relative_path, json_data)
                         key = _get_schema_key(expanded_file_data, branch_name)
-                    else:
-                        expanded_file_data = json_data
-                        key = "property_migrations"
+
                     if key is None:
                         print("- could not find key for: " + path)
                     else:
@@ -138,7 +151,7 @@ def _upload(key, branch_name, file_data, context, dryrun=False):
 
         s3 = boto3.client('s3')
 
-        if (not _key_exists(s3, bucket, key)) or key == "property_migrations":
+        if (not _key_exists(s3, bucket, key)) or (key in UNVERSIONED_FILES):
             try:
                 s3.put_object(Bucket=bucket, Key=key, Body=json.dumps(file_data, indent=2),
                               ContentType='application/json', ACL='public-read', CacheControl="no-cache")

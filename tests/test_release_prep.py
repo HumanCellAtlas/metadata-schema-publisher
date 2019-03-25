@@ -143,8 +143,7 @@ class ReleasePrepTest(TestCase):
         base_path = 'json_schema_path'
         schema_path = 'json_schema_path/core/biomaterial/biomaterial_core.json'
 
-        context = 'develop'
-        release_prep = ReleasePreparation(context, self.versions)
+        release_prep = ReleasePreparation(schema_url='https://schema.dev.data.humancellatlas.org/', version_map=self.versions)
         relative_schema_path = schema_path.replace(base_path + "/", "")
         relative_schema_path = relative_schema_path.replace(".json", "")
 
