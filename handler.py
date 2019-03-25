@@ -100,10 +100,10 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
                     json_data = json.loads(data.decode('utf8'))
 
                     if not path.endswith('property_migrations.json'):
-                        release_preparation = ReleasePreparation()
-                        expanded_file_data = release_preparation.expandURLs(base_server_path, path, json_data,
-                                                                        version_numbers,
-                                                                        branch_name)
+                        release_preparation = ReleasePreparation(branch_name=branch_name, versions=version_numbers)
+                        relative_path = path.replace(base_server_path + "/", "")
+                        relative_path = relative_path.replace(".json", "")
+                        expanded_file_data = release_preparation.expand_urls(relative_path, json_data)
                         key = _get_schema_key(expanded_file_data, branch_name)
                     else:
                         expanded_file_data = json_data
