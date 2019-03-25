@@ -8,7 +8,7 @@ class HandlerTest(TestCase):
 
     def test_process_event_for_master(self):
         # given:
-        with open('./files/mock-master-github-push-event.json') as json_file:
+        with open('tests/files/mock-master-github-push-event.json') as json_file:
             event_json = json.loads(json_file.read())
 
         # when:
@@ -17,7 +17,7 @@ class HandlerTest(TestCase):
 
     def test_process_event_for_develop(self):
         # given:
-        with open('./files/mock-develop-github-push-event.json') as json_file:
+        with open('tests/files/mock-develop-github-push-event.json') as json_file:
             event_json = json.loads(json_file.read())
 
         # when:
