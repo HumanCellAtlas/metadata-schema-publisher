@@ -85,6 +85,19 @@ class ReleasePreparation:
 
         return new_json
 
+    def get_schema_key(self, file_data):
+        if "draft-04" in file_data["$schema"]:
+            schema_id_key = "id"
+        else:
+            schema_id_key = "$id"
+        if schema_id_key in file_data:
+            schema_id = file_data[schema_id_key]
+            key = schema_id.replace(".json", "")
+            key = key.replace(self.schema_url, "")
+        else:
+            key = None
+        return key
+
 
 def _get_json(path):
     f = open(path, 'r')

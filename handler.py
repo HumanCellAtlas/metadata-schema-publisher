@@ -36,6 +36,7 @@ UNVERSIONED_FILES = [
     'property_migrations'
 ]
 
+
 def _notify_ingest(branch_name):
     ingest_base_url = INGEST_API.get(branch_name)
     schema_update_url = f'{ingest_base_url}/schemas/update'
@@ -119,7 +120,7 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
                         schema_url = SCHEMA_URL.get(branch_name)
                         release_preparation = ReleasePreparation(schema_url=schema_url, version_map=version_numbers)
                         expanded_file_data = release_preparation.expand_urls(relative_path, json_data)
-                        key = _get_schema_key(expanded_file_data, branch_name)
+                        key = release_preparation.get_schema_key(expanded_file_data)
 
                     if key is None:
                         print("- could not find key for: " + path)
@@ -172,23 +173,6 @@ def _key_exists(s3, bucket, key):
     for obj in response.get('Contents', []):
         if obj['Key'] == key:
             return obj['Size']
-
-
-def _get_schema_key(file_data, branch_name):
-    if "draft-04" in file_data["$schema"]:
-        schema_id_key = "id"
-    else:
-        schema_id_key = "$id"
-    if schema_id_key in file_data:
-        schema_id = file_data[schema_id_key]
-        key = schema_id.replace(".json", "")
-        key = key.replace("https://schema.humancellatlas.org/", "")
-        key = key.replace("https://schema.dev.data.humancellatlas.org/", "")
-        key = key.replace("https://schema.integration.data.humancellatlas.org/", "")
-        key = key.replace("https://schema.staging.data.humancellatlas.org/", "")
-    else:
-        key = None
-    return key
 
 
 def _send_notification(message, context, dryrun=False):
