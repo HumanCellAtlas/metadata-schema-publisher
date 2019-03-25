@@ -138,7 +138,7 @@ def _upload(key, branch_name, file_data, context, dryrun=False):
 
         s3 = boto3.client('s3')
 
-        if not _key_exists(s3, bucket, key):
+        if (not _key_exists(s3, bucket, key)) or key == "property_migrations":
             try:
                 s3.put_object(Bucket=bucket, Key=key, Body=json.dumps(file_data, indent=2),
                               ContentType='application/json', ACL='public-read', CacheControl="no-cache")
