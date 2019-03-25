@@ -1,21 +1,17 @@
 import json
-from optparse import OptionParser
-import pprint
-
 import os
-
-SCHEMA_BASE = "https://schema.humancellatlas.org/"
-SCHEMA_BASE_DEV = "https://schema.dev.data.humancellatlas.org/"
-SCHEMA_BASE_INT = "https://schema.integration.data.humancellatlas.org/"
-SCHEMA_BASE_STAG = "https://schema.staging.data.humancellatlas.org/"
+from optparse import OptionParser
 
 
-class ReleasePreparation():
+class ReleasePreparation:
+    def __init__(self, schema_url, version_map):
+        self.schema_url = schema_url
+        self.version_map = version_map
 
-    def _findSchemaVersion(self, schema, versions):
+    def _find_schema_version(self, schema):
         hierarchy = schema.split("/")
 
-        latest = versions["version_numbers"]
+        latest = self.version_map["version_numbers"]
 
         for e in hierarchy:
             latest = latest[e]
@@ -23,55 +19,40 @@ class ReleasePreparation():
         if not isinstance(latest, dict):
             return latest
 
-    def _findValue(self, key, dictionary):
+    def _find_value(self, key, dictionary):
         for k, v in dictionary.items():
             if k == key:
                 yield v
             elif isinstance(v, dict):
-                for result in self._findValue(key, v):
+                for result in self._find_value(key, v):
                     yield result
             elif isinstance(v, list):
                 for d in v:
                     if isinstance(d, dict):
-                        for result in self._findValue(key, d):
+                        for result in self._find_value(key, d):
                             yield result
 
-    def _replaceValue(self, key, dictionary, old, new):
+    def _replace_value(self, key, dictionary, old, new):
         for k in dictionary.keys():
             if k == key and dictionary[k] == old:
                 dictionary[k] = new
             elif isinstance(dictionary[k], dict):
-                self._replaceValue(key, dictionary[k], old, new)
+                self._replace_value(key, dictionary[k], old, new)
             elif isinstance(dictionary[k], list):
                 for d in dictionary[k]:
                     if isinstance(d, dict):
-                        self._replaceValue(key, d, old, new)
+                        self._replace_value(key, d, old, new)
 
-    def _insertIntoDict(self, dict, obj, pos):
+    def _insert_into_dict(self, dict, obj, pos):
         return {k: v for k, v in (list(dict.items())[:pos] + list(obj.items()) + list(dict.items())[pos:])}
 
-    def expandURLs(self, base_server_path, path, file_data, version_numbers, branch_name):
-        if branch_name == "develop":
-            self.schema_base = SCHEMA_BASE_DEV
-        elif branch_name == "integration":
-            self.schema_base = SCHEMA_BASE_INT
-        elif branch_name == "staging":
-            self.schema_base = SCHEMA_BASE_STAG
-        else:
-            self.schema_base = SCHEMA_BASE
+    def expand_urls(self, relative_path, file_data):
+        version = self._find_schema_version(relative_path)
 
-        rel = path.replace(base_server_path + "/", "")
-        rel = rel.replace(".json", "")
-
-        # if branch_name == "develop":
-        #     version = "latest"
-        # else:
-        version = self._findSchemaVersion(rel, version_numbers)
-
-        el = rel.split("/")
+        el = relative_path.split("/")
         el.insert(len(el) - 1, version)
 
-        id_url = self.schema_base + "/".join(el)
+        id_url = self.schema_url + "/".join(el)
 
         if "draft-04" in file_data["$schema"]:
             id_key = "id"
@@ -79,10 +60,10 @@ class ReleasePreparation():
             id_key = "$id"
 
         id = ({id_key: id_url})
-        newJson = self._insertIntoDict(file_data, id, 1)
+        new_json = self._insert_into_dict(file_data, id, 1)
 
-        for item in self._findValue("$ref", newJson):
-            if self.schema_base not in item:
+        for item in self._find_value("$ref", new_json):
+            if self.schema_url not in item:
                 d = item.replace(".json", "")
 
                 if "#" in d:
@@ -93,35 +74,46 @@ class ReleasePreparation():
                             el.insert(i, v)
                             break
                 else:
-                    # if branch_name == "develop":
-                    #     v = "latest"
-                    # else:
-                    v = self._findSchemaVersion(d, version_numbers)
+                    v = self._find_schema_version(d)
 
                     el = d.split("/")
                     el.insert(len(el) - 1, v)
 
-                expanded = self.schema_base + "/".join(el)
+                expanded = self.schema_url + "/".join(el)
 
-                self._replaceValue("$ref", newJson, item, expanded)
+                self._replace_value("$ref", new_json, item, expanded)
 
-        return newJson
+        return new_json
+
+    def get_schema_key(self, file_data):
+        if "draft-04" in file_data["$schema"]:
+            schema_id_key = "id"
+        else:
+            schema_id_key = "$id"
+        if schema_id_key in file_data:
+            schema_id = file_data[schema_id_key]
+            key = schema_id.replace(".json", "")
+            key = key.replace(self.schema_url, "")
+        else:
+            key = None
+        return key
 
 
-def _getJson(path):
+def _get_json(path):
     f = open(path, 'r')
     return json.loads(f.read())
 
-def _saveJson(path, data):
+
+def _save_json(path, data):
     with open(path, 'w') as outfile:
         json.dump(data, outfile, indent=4, sort_keys=True)
 
 
-def _getSchemaPaths(path):
-    schemas = [os.path.join(dirpath, f)
+def _get_schema_paths(path):
+    schema_paths = [os.path.join(dirpath, f)
                for dirpath, dirnames, files in os.walk(path)
                for f in files if f.endswith('.json') and not f.endswith('versions.json')]
-    return schemas
+    return schema_paths
 
 
 if __name__ == '__main__':
@@ -144,15 +136,15 @@ if __name__ == '__main__':
     else:
         path = options.path
 
-    versions = _getJson(path + "/versions.json")
+    versions = _get_json(path + "/versions.json")
 
-    schemas = _getSchemaPaths(path)
+    schemas = _get_schema_paths(path)
 
     context = options.context
 
     for s in schemas:
-        jsonSchema = _getJson(s)
+        json_schema = _get_json(s)
 
-        newJson = releasePrep.expandURLs(path, s, jsonSchema, versions, context)
+        newJson = releasePrep.expand_urls(path, s, json_schema)
 
-        _saveJson(s, newJson)
+        _save_json(s, newJson)

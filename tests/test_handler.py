@@ -1,9 +1,7 @@
-import os
-
-from unittest import TestCase
-from unittest.mock import patch
-import handler
 import json
+from unittest import TestCase
+
+import handler
 
 
 class HandlerTest(TestCase):
