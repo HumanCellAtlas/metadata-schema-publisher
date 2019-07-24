@@ -5,7 +5,6 @@ frameworkVersion: ">=1.0.0 <2.0.0"
 plugins:
   - serverless-finch
   - serverless-python-requirements
-
 custom:
   metadata-schema-publisher: ${file(metadata-schema-publisher.yml)}
   snsTopicName: ${self:custom.metadata-schema-publisher.name}-${self:custom.metadata-schema-publisher.notification-event}-${self:custom.metadata-schema-publisher.stage}
