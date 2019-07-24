@@ -50,9 +50,8 @@ def on_github_push(event, context, dryrun=False):
     ref = message["ref"]
 
     if ref in BRANCH_REFS:
-        api_key = os.environ['API_KEY']
         repo_name = message["repository"]["full_name"]
-        repo = Github(api_key).get_repo(repo_name)
+        repo = Github().get_repo(repo_name)
         branch = repo.get_branch(ref)
         pusher = message["pusher"]["name"]
         notification_message = "Commit to " + ref + " detected on " + repo_name + " branch " + branch.name + " by " + pusher
