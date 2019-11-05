@@ -262,5 +262,4 @@ def get_secret(secret_name, region_name=None):
         else:
             decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
 
-    print('-------------' + secret)
     return secret
