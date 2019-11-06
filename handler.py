@@ -1,9 +1,10 @@
 import base64
-import boto3
 import json
 import os
-import requests
 
+import boto3
+import requests
+from botocore.exceptions import ClientError
 from github import Github, GithubException
 
 from release_prep import ReleasePreparation
@@ -48,13 +49,20 @@ def _notify_ingest(branch_name):
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
     ref = message["ref"]
+    access_token_secret_name = os.environ['GH_ACCESS_TOKEN_SECRET_NAME']
+    access_token_secret = json.loads(get_secret(access_token_secret_name))
+    access_token = access_token_secret.get('GITHUB_ACCESS_TOKEN')
+
+    if not access_token:
+        raise Exception('A GitHub access token is required to communicate with GitHub API')
 
     if ref in BRANCH_REFS:
         repo_name = message["repository"]["full_name"]
-        repo = Github().get_repo(repo_name)
+        repo = Github(access_token).get_repo(repo_name)
         branch = repo.get_branch(ref)
         pusher = message["pusher"]["name"]
-        notification_message = "Commit to " + ref + " detected on " + repo_name + " branch " + branch.name + " by " + pusher
+        notification_message = "Commit to " + ref + " detected on " + repo_name + " branch " + branch.name + " by " +\
+                               pusher
         print(notification_message)
         _send_notification(notification_message, context, dryrun)
         server_path = 'json_schema'
@@ -204,3 +212,55 @@ def sns_to_slack(event, context):
     }
     r = requests.post(webhook_url, json=payload)
     return r.status_code
+
+
+def get_secret(secret_name, region_name=None):
+    if not region_name:
+        region_name = os.environ['AWS_PROVIDER_REGION']
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
+    # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+    # We rethrow the exception by default.
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'DecryptionFailureException':
+            # Secrets Manager can't decrypt the protected secret text using the provided KMS key.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'InternalServiceErrorException':
+            # An error occurred on the server side.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'InvalidParameterException':
+            # You provided an invalid value for a parameter.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'InvalidRequestException':
+            # You provided a parameter value that is not valid for the current state of the resource.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response['Error']['Code'] == 'ResourceNotFoundException':
+            # We can't find the resource that you asked for.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+    else:
+        # Decrypts secret using the associated KMS CMK.
+        # Depending on whether the secret is a string or binary, one of these fields will be populated.
+        if 'SecretString' in get_secret_value_response:
+            secret = get_secret_value_response['SecretString']
+        else:
+            decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
+
+    print('-------------' + secret)
+    return secret

@@ -1,3 +1,4 @@
+botocore
 PyGithub
 boto3
 requests
