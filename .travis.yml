@@ -21,3 +21,5 @@ notifications:
 env:
   global:
     - CC_TEST_REPORTER_ID=8f5f5cb6b62c2fa724107bd74656d102369635842755bc9d1084689f966758c5
+    - GH_ACCESS_TOKEN_SECRET_NAME="dcp/metadata/metadata-schema-publisher/github-access-token"
+    - AWS_PROVIDER_REGION=us-east-1
