@@ -46,15 +46,19 @@ def _notify_ingest(branch_name):
     print('Notified Ingest!')
 
 
-def on_github_push(event, context, dryrun=False):
-    message = _process_event(event)
-    ref = message["ref"]
+def get_access_token():
     access_token_secret_name = os.environ['GH_ACCESS_TOKEN_SECRET_NAME']
     access_token_secret = json.loads(get_secret(access_token_secret_name))
     access_token = access_token_secret.get('GITHUB_ACCESS_TOKEN')
-
     if not access_token:
         raise Exception('A GitHub access token is required to communicate with GitHub API')
+    return access_token
+
+
+def on_github_push(event, context, dryrun=False):
+    message = _process_event(event)
+    ref = message["ref"]
+    access_token = get_access_token()
 
     if ref in BRANCH_REFS:
         repo_name = message["repository"]["full_name"]
