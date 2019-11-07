@@ -46,10 +46,8 @@ def _notify_ingest(branch_name):
     print('Notified Ingest!')
 
 
-def get_access_token():
-    access_token_secret_name = os.environ['GH_ACCESS_TOKEN_SECRET_NAME']
-    access_token_secret = json.loads(get_secret(access_token_secret_name))
-    access_token = access_token_secret.get('GITHUB_ACCESS_TOKEN')
+def get_access_token(secrets):
+    access_token = secrets.get('GITHUB_ACCESS_TOKEN')
     if not access_token:
         raise Exception('A GitHub access token is required to communicate with GitHub API')
     return access_token
@@ -58,7 +56,9 @@ def get_access_token():
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
     ref = message["ref"]
-    access_token = get_access_token()
+    secret_name = os.environ['SECRET_NAME']
+    secrets = json.loads(get_secret(secret_name))
+    access_token = get_access_token(secrets)
 
     if ref in BRANCH_REFS:
         repo_name = message["repository"]["full_name"]
@@ -209,7 +209,13 @@ def sns_to_slack(event, context):
     sns = event['Records'][0]['Sns']
     message = sns['Message']
 
-    webhook_url = os.environ['SLACK_URL']
+    secret_name = os.environ['SECRET_NAME']
+    secrets = json.loads(get_secret(secret_name))
+
+    webhook_url = secrets.get('SLACK_URL')
+
+    if not webhook_url:
+        raise Exception('Could not find the slack webhook url!')
 
     payload = {
         'text': message
