@@ -44,9 +44,12 @@ provider:
       Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.dev-bucket-name}/*"
     - Effect: Allow
       Action:
-       - "sns:Publish"
-      Resource:
-       - "Ref" : "Notification"
+        - secretsmanager:GetSecretValue
+      Resource: "arn:aws:secretsmanager:*:*:secret:${self:custom.metadata-schema-publisher.secret-name}-??????"
+    - Effect: Allow
+      Action:
+        - SNS:Publish
+      Resource: "arn:aws:sns:*:*:${self:custom.metadata-schema-publisher.sns-topic-name}"
 
 functions:
   onGithubPush:
@@ -68,6 +71,7 @@ functions:
     runtime: python3.6
     handler: handler.sns_to_slack
     environment:
+      AWS_PROVIDER_REGION: ${self:provider.region}
       SECRET_NAME: ${self:custom.metadata-schema-publisher.secret-name}
     events:
       - sns:
