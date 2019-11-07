@@ -5,6 +5,5 @@ staging-bucket-name: schema.staging.data.humancellatlas.org
 integration-bucket-name: schema.integration.data.humancellatlas.org
 dev-bucket-name: schema.dev.data.humancellatlas.org
 notification-event: notification
-slack-url: https://hooks.slack.com/services/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
 sns-topic-name: metadata-schema-publisher-notification-prod
-github-access-token-secret-name: dcp/metadata/metadata-schema-publisher/github-access-token
+secret-name: dcp/metadata/metadata-schema-publisher/secrets

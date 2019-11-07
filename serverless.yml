@@ -59,7 +59,7 @@ functions:
       DEV_BUCKET: ${self:custom.metadata-schema-publisher.dev-bucket-name}
       TOPIC_NAME: ${self:custom.metadata-schema-publisher.sns-topic-name}
       AWS_PROVIDER_REGION: ${self:provider.region}
-      GH_ACCESS_TOKEN_SECRET_NAME: ${self:custom.metadata-schema-publisher.github-access-token-secret-name}
+      SECRET_NAME: ${self:custom.metadata-schema-publisher.secret-name}
     events:
       - http:
           path: github/push
@@ -68,7 +68,7 @@ functions:
     runtime: python3.6
     handler: handler.sns_to_slack
     environment:
-      SLACK_URL: ${self:custom.metadata-schema-publisher.slack-url}
+      SECRET_NAME: ${self:custom.metadata-schema-publisher.secret-name}
     events:
       - sns:
           arn:
