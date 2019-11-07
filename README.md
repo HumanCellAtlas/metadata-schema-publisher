@@ -40,6 +40,10 @@ serverless invoke --function onGithubPush --path ./tests/files/github-event-push
 serverless deploy -v
 ```
 
+## AWS Permissions
+If you encounter any permissions in running `serverless` cli commands manually, you could setup a new user with the same permissions as `metadata-schema-publisher-serverless-cli` user in AWS. which has adequate permissions to deploy and invoke the publisher lambda function.
+Alternatively, create a new access token for that user and set it up in your credentials and aws profile config.
+
 ## Current Deployment
 
 [metadata-schema-publisher-prod-onGithubPush](https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions/metadata-schema-publisher-prod-onGithubPush?tab=graph)
