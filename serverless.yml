@@ -24,24 +24,24 @@ provider:
         - s3:PutObject
         - s3:PutObjectAcl
       Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.prod-bucket-name}/*"
-    - Effect: Allow
-      Action:
-        - s3:ListBucket
-        - s3:PutObject
-        - s3:PutObjectAcl
-      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.staging-bucket-name}/*"
-    - Effect: Allow
-      Action:
-        - s3:ListBucket
-        - s3:PutObject
-        - s3:PutObjectAcl
-      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.integration-bucket-name}/*"
-    - Effect: Allow
-      Action:
-        - s3:ListBucket
-        - s3:PutObject
-        - s3:PutObjectAcl
-      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.dev-bucket-name}/*"
+    # - Effect: Allow
+    #   Action:
+    #     - s3:ListBucket
+    #     - s3:PutObject
+    #     - s3:PutObjectAcl
+    #   Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.staging-bucket-name}/*"
+    # - Effect: Allow
+    #   Action:
+    #     - s3:ListBucket
+    #     - s3:PutObject
+    #     - s3:PutObjectAcl
+    #   Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.integration-bucket-name}/*"
+    # - Effect: Allow
+    #   Action:
+    #     - s3:ListBucket
+    #     - s3:PutObject
+    #     - s3:PutObjectAcl
+      # Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.dev-bucket-name}/*"
     - Effect: Allow
       Action:
         - secretsmanager:GetSecretValue
@@ -57,9 +57,9 @@ functions:
     handler: handler.on_github_push
     environment:
       PROD_BUCKET: ${self:custom.metadata-schema-publisher.prod-bucket-name}
-      STAGING_BUCKET: ${self:custom.metadata-schema-publisher.staging-bucket-name}
-      INTEGRATION_BUCKET: ${self:custom.metadata-schema-publisher.integration-bucket-name}
-      DEV_BUCKET: ${self:custom.metadata-schema-publisher.dev-bucket-name}
+      # STAGING_BUCKET: ${self:custom.metadata-schema-publisher.staging-bucket-name}
+      # INTEGRATION_BUCKET: ${self:custom.metadata-schema-publisher.integration-bucket-name}
+      # DEV_BUCKET: ${self:custom.metadata-schema-publisher.dev-bucket-name}
       TOPIC_NAME: ${self:custom.metadata-schema-publisher.sns-topic-name}
       AWS_PROVIDER_REGION: ${self:provider.region}
       SECRET_NAME: ${self:custom.metadata-schema-publisher.secret-name}
