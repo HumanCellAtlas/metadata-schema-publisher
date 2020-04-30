@@ -1,4 +1,10 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.13.4
+version: v1.14.1
 ignore: {}
-patch: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-567746:
+    - serverless-finch > lodash:
+        patched: '2020-04-30T21:50:41.619Z'
+    - aws-sdk > xml2js > xmlbuilder > lodash:
+        patched: '2020-04-30T21:50:41.619Z'
