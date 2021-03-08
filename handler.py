@@ -4,10 +4,8 @@ import os
 
 import boto3
 import requests
-from botocore.exceptions import ClientError
 from github import Github, GithubException
-
-from release_prep import ReleasePreparation
+from metadata_schema import MetadataSchema, get_relative_url
 
 BRANCH_REFS = ['refs/heads/master', 'refs/heads/staging', 'refs/heads/integration', 'refs/heads/develop']
 
@@ -82,7 +80,11 @@ def on_github_push(event, context, dryrun=False):
             result_message = result_message + "No schema changes published"
         else:
             result_message = result_message + "New schema changes published:\n" + result_str
-            _notify_ingest(branch.name)
+            # TODO
+            # Either allow POST to Ingest API's endpoint /schemas/update or'
+            # or pass token from here
+            # Disabling for now
+            # _notify_ingest(branch.name)
         print(result_message)
         _send_notification(result_message, context, dryrun)
 
@@ -125,18 +127,17 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
                     key = None
 
                     if relative_path in UNVERSIONED_FILES:
-                        expanded_file_data = json_data
                         key = relative_path
                     else:
-                        schema_url = SCHEMA_URL.get(branch_name)
-                        release_preparation = ReleasePreparation(schema_url=schema_url, version_map=version_numbers)
-                        expanded_file_data = release_preparation.expand_urls(relative_path, json_data)
-                        key = release_preparation.get_schema_key(expanded_file_data)
+                        schema_base_url = SCHEMA_URL.get(branch_name)
+                        metadata_schema = MetadataSchema(json_data, relative_path)
+                        json_data = metadata_schema.get_json_schema(version_numbers, schema_base_url)
+                        key = get_relative_url(relative_path, version_numbers)
 
-                    if key is None:
+                    if not key:
                         print("- could not find key for: " + path)
                     else:
-                        created = _upload(key, branch_name, expanded_file_data, context, dryrun)
+                        created = _upload(key, branch_name, json_data, context, dryrun)
                         if created:
                             created_list.append(key)
                 else:

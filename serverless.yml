@@ -25,7 +25,6 @@ provider:
     - Effect: Allow
       Action:
         - s3:PutObject
-        - s3:PutObjectAcl
       Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.prod-bucket-name}/*"
     - Effect: Allow
       Action:
