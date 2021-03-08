@@ -1,9 +1,9 @@
 name: metadata-schema-publisher
 stage: prod
-prod-bucket-name: schema.archive.data.humancellatlas.org
-# staging-bucket-name: schema.staging.data.humancellatlas.org
-# integration-bucket-name: schema.integration.data.humancellatlas.org
-# dev-bucket-name: schema.dev.archive.data.humancellatlas.org
+prod-bucket-name: schema-humancellatlas-org
+staging-bucket-name: staging-schema-humancellatlas-org
+integration-bucket-name: integration-schema-humancellatlas-org
+dev-bucket-name: dev-schema-humancellatlas-org
 notification-event: notification
 sns-topic-name: metadata-schema-publisher-notification-prod
 secret-name: "metadata-schema-publisher/secrets"

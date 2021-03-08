@@ -19,10 +19,10 @@ BRANCH_CONFIG = {
 }
 
 INGEST_API = {
-    'develop': 'https://api.ingest.dev.data.humancellatlas.org',
-    'integration': 'https://api.ingest.integration.data.humancellatlas.org',
-    'staging': 'https://api.ingest.staging.data.humancellatlas.org',
-    'master': 'https://api.ingest.data.humancellatlas.org'
+    'develop': 'https://api.ingest.dev.archive.data.humancellatlas.org',
+    'integration': 'https://api.ingest.integration.archive.data.humancellatlas.org',
+    'staging': 'https://api.ingest.staging.archive.data.humancellatlas.org',
+    'master': 'https://api.ingest.archive.data.humancellatlas.org'
 }
 
 SCHEMA_URL = {
