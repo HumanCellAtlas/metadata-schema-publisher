@@ -115,4 +115,5 @@ fabric.properties
 /.coverage
 /dryrun/
 venv/
+.venv*/
 .python-version
