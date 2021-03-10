@@ -1,40 +1,40 @@
 from unittest import TestCase
 
-from dict_util import find_key_in_dict
+from dict_util import find_values_with_key
 
 
 class DictUtilTest(TestCase):
-    def test_find_key_in_dict__return_values__when_in_obj(self):
+    def test_find_values_with_key__return_values__when_in_obj(self):
         # given
         dikt = {'ref': 'value'}
 
         # when
-        result = find_key_in_dict('ref', dikt)
+        result = find_values_with_key('ref', dikt)
 
         # then
         self.assertEqual(list(result), ['value'])
 
-    def test_find_key_in_dict__return_empty_generator__when_not_in_obj(self):
+    def test_find_values_with_key__return_empty_generator__when_not_in_obj(self):
         # given
         dikt = {'key': 'value'}
 
         # when
-        result = find_key_in_dict('ref', dikt)
+        result = find_values_with_key('ref', dikt)
 
         # then
         self.assertEqual(list(result), [])
 
-    def test_find_key_in_dict__return_values__when_in_nested_obj(self):
+    def test_find_values_with_key__return_values__when_in_nested_obj(self):
         # given
         dikt = {'key': {'ref': 'value'}}
 
         # when
-        result = find_key_in_dict('ref', dikt)
+        result = find_values_with_key('ref', dikt)
 
         # then
         self.assertEqual(list(result), ['value'])
 
-    def test_find_key_in_dict__return_values__when_in_nested_obj_2_levels(self):
+    def test_find_values_with_key__return_values__when_in_nested_obj_2_levels(self):
         # given
         dikt = {
             'key': {
@@ -45,12 +45,12 @@ class DictUtilTest(TestCase):
         }
 
         # when
-        result = find_key_in_dict('ref', dikt)
+        result = find_values_with_key('ref', dikt)
 
         # then
         self.assertEqual(list(result), ['value'])
 
-    def test_find_key_in_dict__return_values__when_in_nested_obj_4_levels(self):
+    def test_find_values_with_key__return_values__when_in_nested_obj_4_levels(self):
         # given
         dikt = {
             'key': {
@@ -65,12 +65,12 @@ class DictUtilTest(TestCase):
         }
 
         # when
-        result = find_key_in_dict('ref', dikt)
+        result = find_values_with_key('ref', dikt)
 
         # then
         self.assertEqual(list(result), ['value'])
 
-    def test_find_key_in_dict__return_values__when_found_many_in_nested_obj_4_levels(self):
+    def test_find_values_with_key__return_values__when_found_many_in_nested_obj_4_levels(self):
         # given
         dikt = {
             'key': {
@@ -89,12 +89,12 @@ class DictUtilTest(TestCase):
         }
 
         # when
-        result = find_key_in_dict('ref', dikt)
+        result = find_values_with_key('ref', dikt)
 
         # then
         self.assertEqual(sorted(list(result)), sorted(['value', 'value2', 'value3', 'value4', 'value5']))
 
-    def test_find_key_in_dict__return_values__when_found_many_non_unique_in_nested_obj_4_levels(self):
+    def test_find_values_with_key__return_values__when_found_many_non_unique_in_nested_obj_4_levels(self):
         # given
         dikt = {
             'key': {
@@ -113,12 +113,12 @@ class DictUtilTest(TestCase):
         }
 
         # when
-        result = find_key_in_dict('ref', dikt)
+        result = find_values_with_key('ref', dikt)
 
         # then
         self.assertEqual(sorted(list(result)), sorted(['value', 'value2', 'value3', 'value3', 'value3']))
 
-    def test_find_key_in_dict__return_values__when_obj_in_list(self):
+    def test_find_values_with_key__return_values__when_obj_in_list(self):
         # given
         dikt = {
             'key': [
@@ -127,12 +127,12 @@ class DictUtilTest(TestCase):
         }
 
         # when
-        result = find_key_in_dict('ref', dikt)
+        result = find_values_with_key('ref', dikt)
 
         # then
         self.assertEqual(list(result), ['value'])
 
-    def test_find_key_in_dict__return_values__when_obj_in_nested_list(self):
+    def test_find_values_with_key__return_values__when_obj_in_nested_list(self):
         # given
         dikt = {
             'key': [{
@@ -145,12 +145,12 @@ class DictUtilTest(TestCase):
         }
 
         # when
-        result = find_key_in_dict('ref', dikt)
+        result = find_values_with_key('ref', dikt)
 
         # then
         self.assertEqual(list(result), ['value'])
 
-    def test_find_key_in_dict__return_values__when_obj_in_many_nested_list(self):
+    def test_find_values_with_key__return_values__when_obj_in_many_nested_list(self):
         # given
         dikt = {
             'key': [
@@ -200,7 +200,7 @@ class DictUtilTest(TestCase):
         }
 
         # when
-        result = find_key_in_dict('ref', dikt)
+        result = find_values_with_key('ref', dikt)
 
         # then
         self.assertEqual(list(result), ['value0', 'value1', 'value2', 'value3', 'value3', 'value3'])

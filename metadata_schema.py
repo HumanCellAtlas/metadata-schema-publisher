@@ -1,6 +1,6 @@
 import traceback
 
-from dict_util import ImmutableDict, find_key_in_dict
+from dict_util import ImmutableDict, find_values_with_key
 
 
 class MetadataSchema:
@@ -24,7 +24,7 @@ class MetadataSchema:
     def update_refs_urls(self, version_map, schema_base_url) -> dict:
         ref_changes = {}
         entity_version = get_version(self.schema_path, version_map)
-        for schema_ref in find_key_in_dict("$ref", self.json):
+        for schema_ref in find_values_with_key("$ref", self.json):
             if schema_base_url not in schema_ref:
                 ref_path = schema_ref.replace(".json", "")
                 ref_path_parts = ref_path.split("/")
@@ -43,7 +43,7 @@ class MetadataSchema:
                 ref_changes[schema_ref] = new_schema_ref
 
         immutable_schema = ImmutableDict(self.json)
-        self.json = immutable_schema.replace_key_with_values("$ref", ref_changes)
+        self.json = immutable_schema.replace_values_with_key("$ref", ref_changes)
         return self.json
 
     def get_id_key(self):

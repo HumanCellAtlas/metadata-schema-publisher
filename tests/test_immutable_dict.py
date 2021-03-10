@@ -177,20 +177,20 @@ class ImmutableDictTest(TestCase):
             'key3': 'value'
         })
 
-    def test_replace_key_with_values__return_obj_with_new_values_and_original_obj_unchanged(self):
+    def test_replace_values_with_key__return_obj_with_new_values_and_original_obj_unchanged(self):
         # given
         dic = {'key': 'old_value'}
         changes = {'old_value': 'new_value'}
 
         # when
         idic = ImmutableDict(dic)
-        result = idic.replace_key_with_values('key', changes)
+        result = idic.replace_values_with_key('key', changes)
 
         # then
         self.assertEqual(result, {'key': 'new_value'})
         self.assertEqual(dic, {'key': 'old_value'})
 
-    def test_replace_key_with_values__return_obj_with_new_values__when_many_new_values(self):
+    def test_replace_values_with_key__return_obj_with_new_values__when_many_new_values(self):
         # given
         dic = {
             'key': 'old_value',
@@ -207,7 +207,7 @@ class ImmutableDictTest(TestCase):
 
         # when
         idic = ImmutableDict(dic)
-        result = idic.replace_key_with_values('key', changes)
+        result = idic.replace_values_with_key('key', changes)
 
         # then
         expected = {
@@ -220,7 +220,7 @@ class ImmutableDictTest(TestCase):
 
         self.assertEqual(result, expected)
 
-    def test_replace_key_with_values__return_unchanged_obj__when_values_not_found(self):
+    def test_replace_values_with_key__return_unchanged_obj__when_values_not_found(self):
         # given
         dic = {
             'key': 'unchanged',
@@ -237,7 +237,7 @@ class ImmutableDictTest(TestCase):
 
         # when
         idic = ImmutableDict(dic)
-        result = idic.replace_key_with_values('key', changes)
+        result = idic.replace_values_with_key('key', changes)
 
         # then
         expected = {
@@ -250,7 +250,7 @@ class ImmutableDictTest(TestCase):
 
         self.assertEqual(result, expected)
 
-    def test_replace_key_with_values__return_obj_with_new_values__when_given_nested_obj(self):
+    def test_replace_values_with_key__return_obj_with_new_values__when_given_nested_obj(self):
         # given
         dic = {
             'key': {
@@ -278,7 +278,7 @@ class ImmutableDictTest(TestCase):
 
         # when
         idic = ImmutableDict(dic)
-        result = idic.replace_key_with_values('ref', changes)
+        result = idic.replace_values_with_key('ref', changes)
 
         # then
         expected = {
@@ -299,7 +299,7 @@ class ImmutableDictTest(TestCase):
 
         self.assertEqual(result, expected)
 
-    def test_replace_key_with_values__return_obj_with_new_values__when_given_nested_obj_list(self):
+    def test_replace_values_with_key__return_obj_with_new_values__when_given_nested_obj_list(self):
         # given
         dic = {
             'key': [
@@ -363,7 +363,7 @@ class ImmutableDictTest(TestCase):
 
         # when
         idic = ImmutableDict(dic)
-        result = idic.replace_key_with_values('ref', changes)
+        result = idic.replace_values_with_key('ref', changes)
 
         # then
         expected = {
