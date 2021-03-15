@@ -81,10 +81,8 @@ def on_github_push(event, context, dryrun=False):
         else:
             result_message = result_message + "New schema changes published:\n" + result_str
             # TODO
-            # Either allow POST to Ingest API's endpoint /schemas/update or'
-            # or pass token from here
-            # Disabling for now
-            # _notify_ingest(branch.name)
+            # Should notify Ingest
+            # https://github.com/ebi-ait/dcp-ingest-central/issues/217
         print(result_message)
         _send_notification(result_message, context, dryrun)
 
