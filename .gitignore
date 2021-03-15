@@ -117,3 +117,4 @@ fabric.properties
 venv/
 .venv*/
 .python-version
+_local/
