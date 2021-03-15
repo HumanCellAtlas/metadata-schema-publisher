@@ -3,12 +3,8 @@ import os
 
 from unittest import TestCase
 
+from file_util import load_json
 from metadata_schema import MetadataSchema, get_version, MetadataSchemaError, get_relative_url
-
-
-def load_json(file_path):
-    with open(file_path, 'r') as f:
-        return json.loads(f.read())
 
 
 class MetadataSchemaTest(TestCase):
