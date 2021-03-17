@@ -22,6 +22,13 @@ resource "aws_cloudfront_distribution" "schema_cloudfront_dist" {
     }
   }
 
+  custom_error_response {
+    error_caching_min_ttl = "300"
+    error_code = "404"
+    response_code = "200"
+    response_page_path = "/index.html"
+  }
+
   default_cache_behavior {
     target_origin_id = "origin-${local.bucket_name}"
     allowed_methods  = ["GET", "HEAD"]
