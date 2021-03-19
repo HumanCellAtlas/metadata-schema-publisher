@@ -1,10 +1,13 @@
 import base64
 import json
 import os
+import time
 
 import boto3
 import requests
 from github import Github, GithubException
+from ingest.utils.dcp_auth_client import DCPAuthClient
+
 from metadata_schema import MetadataSchema, get_relative_url
 
 BRANCH_REFS = ['refs/heads/master', 'refs/heads/staging', 'refs/heads/integration', 'refs/heads/develop']
@@ -36,10 +39,18 @@ UNVERSIONED_FILES = [
 ]
 
 
-def _notify_ingest(branch_name):
+def get_ingest_token(service_account):
+    auth_client = DCPAuthClient(service_account['project_id'], service_account)
+    token = auth_client.token
+    return token
+
+
+def notify_ingest(branch_name, service_account):
     ingest_base_url = INGEST_API.get(branch_name)
     schema_update_url = f'{ingest_base_url}/schemas/update'
-    r = requests.post(schema_update_url)
+    token = get_ingest_token(service_account)
+    headers = {'Authorization': f'Bearer {token}'}
+    r = requests.post(schema_update_url, headers=headers)
     r.raise_for_status()
     print('Notified Ingest!')
 
@@ -51,12 +62,20 @@ def get_access_token(secrets):
     return access_token
 
 
+def get_service_account(secrets):
+    service_account = secrets.get('GCP_SERVICE_ACCOUNT')
+    if not service_account:
+        raise Exception('A GCP service account is required to communicate with Ingest API')
+    return json.loads(service_account)
+
+
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
     ref = message["ref"]
     secret_name = os.environ['SECRET_NAME']
     secrets = json.loads(get_secret(secret_name))
     access_token = get_access_token(secrets)
+    service_account = get_service_account(secrets)
 
     if ref in BRANCH_REFS:
         repo_name = message["repository"]["full_name"]
@@ -80,9 +99,9 @@ def on_github_push(event, context, dryrun=False):
             result_message = result_message + "No schema changes published"
         else:
             result_message = result_message + "New schema changes published:\n" + result_str
-            # TODO
-            # Should notify Ingest
-            # https://github.com/ebi-ait/dcp-ingest-central/issues/217
+            time.sleep(5)
+            notify_ingest(branch.name, service_account)
+
         print(result_message)
         _send_notification(result_message, context, dryrun)
 
