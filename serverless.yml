@@ -101,3 +101,7 @@ resources:
       Properties:
         TopicName: ${self:custom.snsTopicName}
 
+package:
+  exclude:
+    - node_modules/**
+    - .venv/**
