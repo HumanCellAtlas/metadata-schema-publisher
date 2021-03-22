@@ -4,9 +4,9 @@ import os
 import time
 
 import boto3
+import jwt
 import requests
 from github import Github, GithubException
-from ingest.utils.dcp_auth_client import DCPAuthClient
 
 from metadata_schema import MetadataSchema, get_relative_url
 
@@ -39,16 +39,34 @@ UNVERSIONED_FILES = [
 ]
 
 
-def get_ingest_token(service_account):
-    auth_client = DCPAuthClient(service_account['project_id'], service_account)
-    token = auth_client.token
-    return token
+DEFAULT_JWT_AUDIENCE = 'https://dev.data.humancellatlas.org/'
+
+
+def get_service_jwt(service_credentials, audience):
+    iat = time.time()
+    exp = iat + 3600
+    payload = {'iss': service_credentials["client_email"],
+               'sub': service_credentials["client_email"],
+               'aud': audience,
+               'iat': iat,
+               'exp': exp,
+               'scope': ["openid", "email", "offline_access"]
+               }
+    additional_headers = {'kid': service_credentials["private_key_id"]}
+    signed_jwt = jwt.encode(payload, service_credentials["private_key"], headers=additional_headers,
+                            algorithm='RS256').decode()
+    return signed_jwt
 
 
 def notify_ingest(branch_name, service_account):
     ingest_base_url = INGEST_API.get(branch_name)
     schema_update_url = f'{ingest_base_url}/schemas/update'
-    token = get_ingest_token(service_account)
+
+    audience = DEFAULT_JWT_AUDIENCE
+    if branch_name == 'master':
+        audience = "https://data.humancellatlas.org/"
+
+    token = get_service_jwt(service_account, audience)
     headers = {'Authorization': f'Bearer {token}'}
     r = requests.post(schema_update_url, headers=headers)
     r.raise_for_status()
