@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# Utility script to switch between Python 2 and 3 on the custom Amazon Linux image because Yum breaks
+# when setting python command to Python 3 (which is honestly frustrating).
+
+version=$1
+
+if [ -z $version ]; then
+    echo 'Please specify the Python version to switch to.'
+    exit 1
+fi
+
+if [ $version -ne 2 ] && [ $version -ne 3 ]; then
+    echo 'Specify either version 2 or 3 only.'
+    exit 1
+fi
+
+rm /usr/bin/python
+ln -s /usr/bin/python${version} /usr/bin/python
+
+[[ -e /usr/bin/pip ]] && rm /usr/bin/pip
+[[ ! -z $version ]] && [[ -e /usr/bin/pip${version} ]] && ln -s /usr/bin/pip${version} /usr/bin/pip
+
+python --version

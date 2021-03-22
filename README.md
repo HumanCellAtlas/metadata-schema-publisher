@@ -27,7 +27,7 @@ pip install -r requirements.txt
 Run with a simulated GitHub event:
 
 ```
-serverless invoke local --function onGithubPush --path ./tests/files/mock-develop-github-push-event.json
+serverless invoke local --function onGithubPush --path ./tests/files/events/mock-develop-github-push-event.json
 ```
 
 ## Invoke on AWS
@@ -35,6 +35,8 @@ serverless invoke local --function onGithubPush --path ./tests/files/mock-develo
 serverless invoke --function onGithubPush --path ./tests/files/events/mock-develop-github-push-event.json
 ```
 ## Deploy
+This should be done on a docker container with an image based from the amazon linux distribution. The Dockerfile in the `deployment/` directory can be used to create the image.
+
 ```
 serverless deploy -v
 ```
