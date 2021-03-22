@@ -35,10 +35,27 @@ serverless invoke local --function onGithubPush --path ./tests/files/events/mock
 serverless invoke --function onGithubPush --path ./tests/files/events/mock-develop-github-push-event.json
 ```
 ## Deploy
-This should be done on a docker container with an image based from the amazon linux distribution. The Dockerfile in the `deployment/` directory can be used to create the image.
-
+1. cd to deployment dir
 ```
-serverless deploy -v
+cd deployment
+```
+2. Build image
+```
+docker build -t lambda-deployment .
+```
+3. 
+```
+docker-compose up -d
+```
+
+4. SSH into the container
+```
+docker exec -it deployment_deployment_1 /bin/bash
+```
+5. Inside the container run, go to the publisher directory and run the deploy command
+```
+$ cd code/metadata-schema-publisher/
+$ serverless deploy -v
 ```
 
 ## AWS Permissions
