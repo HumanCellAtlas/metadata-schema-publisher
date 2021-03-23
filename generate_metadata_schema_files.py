@@ -32,8 +32,8 @@ if __name__ == '__main__':
 
     schemas = get_schema_paths(path)
 
-    for s in schemas:
-        raw_schema_json = load_json(s)
+    for schema in schemas:
+        raw_schema_json = load_json(schema)
         metadata_schema = MetadataSchema(path, raw_schema_json)
         new_json = metadata_schema.get_json_schema(version_map, args.schema_base_url)
-        dump_json(s, new_json)
+        dump_json(schema, new_json)
