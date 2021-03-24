@@ -1,0 +1,11 @@
+version: '3'
+services:
+  deployment:
+    build: .
+    image: lambda-deployment
+    volumes:
+      - ../..:/code
+      - $HOME/.aws:/aws/host:ro
+    environment:
+      - AWS_PROFILE=${AWS_PROFILE}
+      - DEPLOYMENT_STAGE=${DEPLOYMENT_STAGE}

@@ -2,3 +2,4 @@ botocore
 PyGithub
 boto3
 requests
+hca-ingest

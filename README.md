@@ -27,7 +27,7 @@ pip install -r requirements.txt
 Run with a simulated GitHub event:
 
 ```
-serverless invoke local --function onGithubPush --path ./tests/files/mock-develop-github-push-event.json
+serverless invoke local --function onGithubPush --path ./tests/files/events/mock-develop-github-push-event.json
 ```
 
 ## Invoke on AWS
@@ -35,8 +35,27 @@ serverless invoke local --function onGithubPush --path ./tests/files/mock-develo
 serverless invoke --function onGithubPush --path ./tests/files/events/mock-develop-github-push-event.json
 ```
 ## Deploy
+1. cd to deployment dir
 ```
-serverless deploy -v
+cd deployment
+```
+2. Build image
+```
+docker build -t lambda-deployment .
+```
+3. 
+```
+docker-compose up -d
+```
+
+4. SSH into the container
+```
+docker exec -it deployment_deployment_1 /bin/bash
+```
+5. Inside the container run, go to the publisher directory and run the deploy command
+```
+$ cd code/metadata-schema-publisher/
+$ serverless deploy -v
 ```
 
 ## AWS Permissions

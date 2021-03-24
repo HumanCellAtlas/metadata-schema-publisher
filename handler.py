@@ -1,10 +1,13 @@
 import base64
 import json
 import os
+import time
 
 import boto3
+import jwt
 import requests
 from github import Github, GithubException
+
 from metadata_schema import MetadataSchema, get_relative_url
 
 BRANCH_REFS = ['refs/heads/master', 'refs/heads/staging', 'refs/heads/integration', 'refs/heads/develop']
@@ -36,10 +39,36 @@ UNVERSIONED_FILES = [
 ]
 
 
-def _notify_ingest(branch_name):
+DEFAULT_JWT_AUDIENCE = 'https://dev.data.humancellatlas.org/'
+
+
+def get_service_jwt(service_credentials, audience):
+    iat = time.time()
+    exp = iat + 3600
+    payload = {'iss': service_credentials["client_email"],
+               'sub': service_credentials["client_email"],
+               'aud': audience,
+               'iat': iat,
+               'exp': exp,
+               'scope': ["openid", "email", "offline_access"]
+               }
+    additional_headers = {'kid': service_credentials["private_key_id"]}
+    signed_jwt = jwt.encode(payload, service_credentials["private_key"], headers=additional_headers,
+                            algorithm='RS256').decode()
+    return signed_jwt
+
+
+def notify_ingest(branch_name, service_account):
     ingest_base_url = INGEST_API.get(branch_name)
     schema_update_url = f'{ingest_base_url}/schemas/update'
-    r = requests.post(schema_update_url)
+
+    audience = DEFAULT_JWT_AUDIENCE
+    if branch_name == 'master':
+        audience = "https://data.humancellatlas.org/"
+
+    token = get_service_jwt(service_account, audience)
+    headers = {'Authorization': f'Bearer {token}'}
+    r = requests.post(schema_update_url, headers=headers)
     r.raise_for_status()
     print('Notified Ingest!')
 
@@ -51,12 +80,20 @@ def get_access_token(secrets):
     return access_token
 
 
+def get_service_account(secrets):
+    service_account = secrets.get('GCP_SERVICE_ACCOUNT')
+    if not service_account:
+        raise Exception('A GCP service account is required to communicate with Ingest API')
+    return json.loads(service_account)
+
+
 def on_github_push(event, context, dryrun=False):
     message = _process_event(event)
     ref = message["ref"]
     secret_name = os.environ['SECRET_NAME']
     secrets = json.loads(get_secret(secret_name))
     access_token = get_access_token(secrets)
+    service_account = get_service_account(secrets)
 
     if ref in BRANCH_REFS:
         repo_name = message["repository"]["full_name"]
@@ -80,9 +117,9 @@ def on_github_push(event, context, dryrun=False):
             result_message = result_message + "No schema changes published"
         else:
             result_message = result_message + "New schema changes published:\n" + result_str
-            # TODO
-            # Should notify Ingest
-            # https://github.com/ebi-ait/dcp-ingest-central/issues/217
+            time.sleep(5)
+            notify_ingest(branch.name, service_account)
+
         print(result_message)
         _send_notification(result_message, context, dryrun)
 
