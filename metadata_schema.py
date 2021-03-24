@@ -10,8 +10,8 @@ class MetadataSchema:
         self.json = raw_json
 
     def get_json_schema(self, version_map: dict, schema_base_url: str):
-        self.json = self.insert_id_url(version_map, schema_base_url)
-        self.json = self.update_refs_urls(version_map, schema_base_url)
+        self.insert_id_url(version_map, schema_base_url)
+        self.update_refs_urls(version_map, schema_base_url)
         return self.json
 
     def insert_id_url(self, version_map, schema_base_url):
