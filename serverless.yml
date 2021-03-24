@@ -21,26 +21,34 @@ provider:
     - Effect: Allow
       Action:
         - s3:ListBucket
+      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.prod-bucket-name}"
+    - Effect: Allow
+      Action:
         - s3:PutObject
-        - s3:PutObjectAcl
       Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.prod-bucket-name}/*"
     - Effect: Allow
       Action:
         - s3:ListBucket
+      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.staging-bucket-name}"
+    - Effect: Allow
+      Action:
         - s3:PutObject
-        - s3:PutObjectAcl
       Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.staging-bucket-name}/*"
     - Effect: Allow
       Action:
         - s3:ListBucket
+      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.integration-bucket-name}"
+    - Effect: Allow
+      Action:
         - s3:PutObject
-        - s3:PutObjectAcl
       Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.integration-bucket-name}/*"
     - Effect: Allow
       Action:
         - s3:ListBucket
+      Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.dev-bucket-name}"
+    - Effect: Allow
+      Action:
         - s3:PutObject
-        - s3:PutObjectAcl
       Resource: "arn:aws:s3:::${self:custom.metadata-schema-publisher.dev-bucket-name}/*"
     - Effect: Allow
       Action:
@@ -93,3 +101,7 @@ resources:
       Properties:
         TopicName: ${self:custom.snsTopicName}
 
+package:
+  exclude:
+    - node_modules/**
+    - .venv/**
