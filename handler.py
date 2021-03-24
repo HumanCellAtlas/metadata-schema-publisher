@@ -169,7 +169,7 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
                         json_data = metadata_schema.get_json_schema(version_numbers, schema_base_url)
                         key = get_relative_url(relative_path, version_numbers)
 
-                    if not key:
+                    if key is None:
                         print("- could not find key for: " + path)
                     else:
                         created = _upload(key, branch_name, json_data, context, dryrun)
