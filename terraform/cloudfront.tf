@@ -23,7 +23,7 @@ resource "aws_cloudfront_distribution" "schema_cloudfront_dist" {
   }
 
   custom_error_response {
-    error_caching_min_ttl = "300"
+    error_caching_min_ttl = "10"
     error_code = "404"
     response_code = "200"
     response_page_path = "/index.html"
@@ -45,8 +45,8 @@ resource "aws_cloudfront_distribution" "schema_cloudfront_dist" {
 
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
-    default_ttl            = 300
-    max_ttl                = 1200
+    default_ttl            = 0
+    max_ttl                = 0
   }
 
   viewer_certificate {
