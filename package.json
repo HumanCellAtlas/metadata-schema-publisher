@@ -24,7 +24,7 @@
     "lambda-git": "^0.1.2",
     "rimraf": "^2.6.2",
     "serverless-finch": "^1.4.0",
-    "simple-git": "^1.89.0",
+    "simple-git": "^3.3.0",
     "url-parse": ">=1.4.3"
   },
   "devDependencies": {
