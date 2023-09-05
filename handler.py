@@ -23,7 +23,7 @@ INGEST_API = {
     'develop': 'https://api.ingest.dev.archive.data.humancellatlas.org',
     'integration': 'https://api.ingest.integration.archive.data.humancellatlas.org',
     'staging': 'https://api.ingest.staging.archive.data.humancellatlas.org',
-    'master': 'https://api.ingest.archive.data.humancellatlas.org'
+    'main': 'https://api.ingest.archive.data.humancellatlas.org'
 }
 
 SCHEMA_URL = {
