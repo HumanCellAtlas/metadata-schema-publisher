@@ -10,9 +10,9 @@ import jwt
 import requests
 from github import Github, GithubException
 
-from metadata_schema import MetadataSchema, get_relative_url
+from metadata_schema import MetadataSchema, get_relative_url, MetadataSchemaError
 
-BRANCH_REFS = ['refs/heads/master', 'refs/heads/staging', 'refs/heads/integration', 'refs/heads/develop']
+BRANCH_REFS = ['refs/heads/main', 'refs/heads/staging', 'refs/heads/integration', 'refs/heads/develop']
 
 BRANCH_CONFIG = {
     'develop': 'DEV_BUCKET',
@@ -205,6 +205,13 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
     return created_list, error_list
 
 
+def resolve_schema_base_url(branch_name):
+    schema_base_url = os.getenv('METADATA_SCHEMA_PUBLISHER_SCHEMA_BASE_URL')
+    if not schema_base_url:
+        schema_base_url = SCHEMA_URL.get(branch_name)
+    if schema_base_url[-1] != '/':
+        schema_base_url = schema_base_url + '/'
+    return schema_base_url
 
 
 def _upload(key, branch_name, file_data, context):
