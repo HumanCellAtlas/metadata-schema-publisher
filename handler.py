@@ -114,9 +114,9 @@ def on_github_push(event, context, dryrun=False):
         result_message = ""
 
         if len(result) == 0:
-            result_message = result_message + "No schema changes published"
+            result_message = result_message + f"No schema changes published. Error count {len(errors)}"
         else:
-            result_message = result_message + "New schema changes published:\n" + result_str
+            result_message = result_message + f"New schema changes published:\n{result_str}\nError count {len(errors)}"
             time.sleep(5)
             notify_ingest(branch.name, service_account)
 
@@ -125,13 +125,17 @@ def on_github_push(event, context, dryrun=False):
 
     else:
         result = []
+        errors = []
 
     response = {
         "statusCode": 200,
-        "body": {
-            "created": json.dumps(result)
-        }
+        "body": json.dumps({
+            "created": result,
+            "errors": errors
+        })
     }
+    if is_dry_run():
+        print("DRY RUN:" + json.dumps(response))
     return response
 
 
@@ -143,6 +147,7 @@ def _process_event(event):
 def _process_directory(repo, branch_name, base_server_path, server_path, version_numbers, context, dryrun=False):
     print("Processing " + server_path + " in " + branch_name + " branch of " + repo.name)
     created_list = []
+    error_list = []
     contents = repo.get_dir_contents(server_path, branch_name)
     for content in contents:
         if content.type == 'dir':
@@ -152,7 +157,9 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
             try:
                 path = content.path
                 file_root, file_extension = os.path.splitext(path)
-                if file_extension == '.json' and not path.endswith('versions.json'):
+                if path.endswith('versions.json') or path.endswith('.md'):
+                    print("- skipping: " + path)
+                else:
                     print("- processing: " + path)
                     file_content = repo.get_contents(path, branch_name)
                     data = base64.b64decode(file_content.content)
