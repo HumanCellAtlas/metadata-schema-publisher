@@ -1,3 +1,4 @@
+assertpy
 coverage
 mock
-nose
+pytest
