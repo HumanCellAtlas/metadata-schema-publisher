@@ -198,9 +198,9 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
                         created = _upload(key, branch_name, json_data, context)
                         if created:
                             created_list.append(key)
-                else:
-                    print("- skipping: " + path)
-            except(GithubException, IOError) as e:
+
+            except(GithubException, IOError, JSONDecodeError, MetadataSchemaError) as e:
+                error_list.append({'path': 'content.path', 'error': str(e)})
                 print('Error processing %s: %s', content.path, e)
     return created_list, error_list
 
