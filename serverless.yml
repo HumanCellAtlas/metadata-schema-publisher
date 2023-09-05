@@ -1,6 +1,6 @@
 service: ${self:custom.metadata-schema-publisher.name}
 
-frameworkVersion: ">=1.0.0 <2.0.0"
+frameworkVersion: ">=3.34.0 <4.0.0"
 
 plugins:
   - serverless-finch
@@ -61,7 +61,7 @@ provider:
 
 functions:
   onGithubPush:
-    runtime: python3.6
+    runtime: python3.10
     handler: handler.on_github_push
     environment:
       PROD_BUCKET: ${self:custom.metadata-schema-publisher.prod-bucket-name}
@@ -76,7 +76,7 @@ functions:
           path: github/push
           method: post
   snsToSlack:
-    runtime: python3.6
+    runtime: python3.10
     handler: handler.sns_to_slack
     environment:
       AWS_PROVIDER_REGION: ${self:provider.region}
