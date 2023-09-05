@@ -16,7 +16,7 @@ BRANCH_CONFIG = {
     'develop': 'DEV_BUCKET',
     'integration': 'INTEGRATION_BUCKET',
     'staging': 'STAGING_BUCKET',
-    'master': 'PROD_BUCKET'
+    'main': 'PROD_BUCKET'
 }
 
 INGEST_API = {
@@ -27,7 +27,7 @@ INGEST_API = {
 }
 
 SCHEMA_URL = {
-    'master': 'https://schema.humancellatlas.org/',
+    'main': 'https://schema.humancellatlas.org/',
     'develop': 'https://schema.dev.data.humancellatlas.org/',
     'integration': 'https://schema.integration.data.humancellatlas.org/',
     'staging': 'https://schema.staging.data.humancellatlas.org/'
@@ -107,9 +107,9 @@ def on_github_push(event, context, dryrun=False):
         server_path = 'json_schema'
         versions_file = repo.get_contents(server_path + "/versions.json", branch.name)
         version_numbers_str = base64.b64decode(versions_file.content).decode("utf-8")
-        version_numbers = json.loads(version_numbers_str)
+        version_map = json.loads(version_numbers_str)
 
-        result = _process_directory(repo, branch.name, server_path, server_path, version_numbers, context, dryrun)
+        result, errors = _process_directory(repo, branch.name, server_path, server_path, version_map, context)
         result_str = "\n".join(result)
         result_message = ""
 
@@ -151,8 +151,9 @@ def _process_directory(repo, branch_name, base_server_path, server_path, version
     contents = repo.get_dir_contents(server_path, branch_name)
     for content in contents:
         if content.type == 'dir':
-            created_list.extend(
-                _process_directory(repo, branch_name, base_server_path, content.path, version_numbers, context, dryrun))
+            results, errors = _process_directory(repo, branch_name, base_server_path, content.path, version_map, context)
+            created_list.extend(results)
+            error_list.extend(errors)
         else:
             try:
                 path = content.path
