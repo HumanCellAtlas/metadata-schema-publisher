@@ -3,204 +3,206 @@ from unittest import TestCase
 from dict_util import find_values_with_key
 
 
-class DictUtilTest(TestCase):
-    def test_find_values_with_key__return_values__when_in_obj(self):
-        # given
-        dikt = {'ref': 'value'}
 
-        # when
-        result = find_values_with_key('ref', dikt)
+def test_find_values_with_key__return_values__when_in_obj():
+    # given
+    dikt = {'ref': 'value'}
 
-        # then
-        self.assertEqual(list(result), ['value'])
+    # when
+    result = find_values_with_key('ref', dikt)
 
-    def test_find_values_with_key__return_empty_generator__when_not_in_obj(self):
-        # given
-        dikt = {'key': 'value'}
+    # then
+    assert list(result) == ['value']
 
-        # when
-        result = find_values_with_key('ref', dikt)
+def test_find_values_with_key__return_empty_generator__when_not_in_obj():
+    # given
+    dikt = {'key': 'value'}
 
-        # then
-        self.assertEqual(list(result), [])
+    # when
+    result = find_values_with_key('ref', dikt)
 
-    def test_find_values_with_key__return_values__when_in_nested_obj(self):
-        # given
-        dikt = {'key': {'ref': 'value'}}
+    # then
+    assert list(result) == []
 
-        # when
-        result = find_values_with_key('ref', dikt)
 
-        # then
-        self.assertEqual(list(result), ['value'])
+def test_find_values_with_key__return_values__when_in_nested_obj():
+    # given
+    dikt = {'key': {'ref': 'value'}}
 
-    def test_find_values_with_key__return_values__when_in_nested_obj_2_levels(self):
-        # given
-        dikt = {
+    # when
+    result = find_values_with_key('ref', dikt)
+
+    # then
+    assert list(result) == ['value']
+
+
+def test_find_values_with_key__return_values__when_in_nested_obj_2_levels():
+    # given
+    dikt = {
+        'key': {
             'key': {
-                'key': {
-                    'ref': 'value'
-                }
+                'ref': 'value'
             }
         }
+    }
 
-        # when
-        result = find_values_with_key('ref', dikt)
+    # when
+    result = find_values_with_key('ref', dikt)
 
-        # then
-        self.assertEqual(list(result), ['value'])
+    # then
+    assert list(result) == ['value']
 
-    def test_find_values_with_key__return_values__when_in_nested_obj_4_levels(self):
-        # given
-        dikt = {
+def test_find_values_with_key__return_values__when_in_nested_obj_4_levels():
+    # given
+    dikt = {
+        'key': {
             'key': {
                 'key': {
                     'key': {
-                        'key': {
-                            'ref': 'value'
-                        }
+                        'ref': 'value'
                     }
                 }
             }
         }
+    }
 
-        # when
-        result = find_values_with_key('ref', dikt)
+    # when
+    result = find_values_with_key('ref', dikt)
 
-        # then
-        self.assertEqual(list(result), ['value'])
+    # then
+    assert list(result) == ['value']
 
-    def test_find_values_with_key__return_values__when_found_many_in_nested_obj_4_levels(self):
-        # given
-        dikt = {
+def test_find_values_with_key__return_values__when_found_many_in_nested_obj_4_levels():
+    # given
+    dikt = {
+        'key': {
             'key': {
                 'key': {
                     'key': {
-                        'key': {
-                            'ref': 'value'
-                        },
-                        'ref': 'value5'
+                        'ref': 'value'
                     },
-                    'ref': 'value4'
+                    'ref': 'value5'
                 },
-                'ref': 'value3'
+                'ref': 'value4'
             },
-            'ref': 'value2'
-        }
+            'ref': 'value3'
+        },
+        'ref': 'value2'
+    }
 
-        # when
-        result = find_values_with_key('ref', dikt)
+    # when
+    result = find_values_with_key('ref', dikt)
 
-        # then
-        self.assertEqual(sorted(list(result)), sorted(['value', 'value2', 'value3', 'value4', 'value5']))
+    # then
+    assert sorted(list(result)) == sorted(['value', 'value2', 'value3', 'value4', 'value5'])
 
-    def test_find_values_with_key__return_values__when_found_many_non_unique_in_nested_obj_4_levels(self):
-        # given
-        dikt = {
+def test_find_values_with_key__return_values__when_found_many_non_unique_in_nested_obj_4_levels():
+    # given
+    dikt = {
+        'key': {
             'key': {
                 'key': {
                     'key': {
-                        'key': {
-                            'ref': 'value'
-                        },
-                        'ref': 'value3'
+                        'ref': 'value'
                     },
                     'ref': 'value3'
                 },
                 'ref': 'value3'
             },
-            'ref': 'value2'
-        }
+            'ref': 'value3'
+        },
+        'ref': 'value2'
+    }
 
-        # when
-        result = find_values_with_key('ref', dikt)
+    # when
+    result = find_values_with_key('ref', dikt)
 
-        # then
-        self.assertEqual(sorted(list(result)), sorted(['value', 'value2', 'value3', 'value3', 'value3']))
+    # then
+    assert sorted(list(result)) == sorted(['value', 'value2', 'value3', 'value3', 'value3'])
 
-    def test_find_values_with_key__return_values__when_obj_in_list(self):
-        # given
-        dikt = {
-            'key': [
-                {'ref': 'value'}
-            ]
-        }
+def test_find_values_with_key__return_values__when_obj_in_list():
+    # given
+    dikt = {
+        'key': [
+            {'ref': 'value'}
+        ]
+    }
 
-        # when
-        result = find_values_with_key('ref', dikt)
+    # when
+    result = find_values_with_key('ref', dikt)
 
-        # then
-        self.assertEqual(list(result), ['value'])
+    # then
+    assert list(result) == ['value']
 
-    def test_find_values_with_key__return_values__when_obj_in_nested_list(self):
-        # given
-        dikt = {
+def test_find_values_with_key__return_values__when_obj_in_nested_list():
+    # given
+    dikt = {
+        'key': [{
             'key': [{
                 'key': [{
-                    'key': [{
-                        'ref': 'value'
-                    }]
+                    'ref': 'value'
                 }]
             }]
-        }
+        }]
+    }
 
-        # when
-        result = find_values_with_key('ref', dikt)
+    # when
+    result = find_values_with_key('ref', dikt)
 
-        # then
-        self.assertEqual(list(result), ['value'])
+    # then
+    assert list(result) == ['value']
 
-    def test_find_values_with_key__return_values__when_obj_in_many_nested_list(self):
-        # given
-        dikt = {
-            'key': [
-                {
+def test_find_values_with_key__return_values__when_obj_in_many_nested_list():
+    # given
+    dikt = {
+        'key': [
+            {
+                'key': [{
                     'key': [{
-                        'key': [{
-                            'ref': 'value0'
-                        }]
+                        'ref': 'value0'
                     }]
-                },
-                {
+                }]
+            },
+            {
+                'key': [{
                     'key': [{
-                        'key': [{
-                            'ref': 'value1'
-                        }]
+                        'ref': 'value1'
                     }]
-                },
-                {
+                }]
+            },
+            {
+                'key': [{
                     'key': [{
-                        'key': [{
-                            'ref': 'value2'
-                        }]
+                        'ref': 'value2'
                     }]
-                },
-                {
+                }]
+            },
+            {
+                'key': [{
                     'key': [{
-                        'key': [{
-                            'ref': 'value3'
-                        }]
+                        'ref': 'value3'
                     }]
-                },
-                {
+                }]
+            },
+            {
+                'key': [{
                     'key': [{
-                        'key': [{
-                            'ref': 'value3'
-                        }]
+                        'ref': 'value3'
                     }]
-                },
-                {
+                }]
+            },
+            {
+                'key': [{
                     'key': [{
-                        'key': [{
-                            'ref': 'value3'
-                        }]
+                        'ref': 'value3'
                     }]
-                }
-            ]
-        }
+                }]
+            }
+        ]
+    }
 
-        # when
-        result = find_values_with_key('ref', dikt)
+    # when
+    result = find_values_with_key('ref', dikt)
 
-        # then
-        self.assertEqual(list(result), ['value0', 'value1', 'value2', 'value3', 'value3', 'value3'])
+    # then
+    assert list(result) == ['value0', 'value1', 'value2', 'value3', 'value3', 'value3']
